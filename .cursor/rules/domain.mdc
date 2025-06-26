@@ -1,0 +1,70 @@
+---
+description: 
+globs: src/core/domain/**/*
+alwaysApply: false
+---
+# Domain Layer Rules
+
+## Location
+All domain code lives in `src/core/domain/`
+
+## Structure
+```
+src/core/domain/
+├── entities/           # Business entities with domain logic
+├── repositories/       # Repository interfaces (contracts)
+├── events/            # Domain events
+├── value-objects/     # Immutable domain concepts
+└── index.ts          # Barrel exports
+```
+
+## Entity Guidelines
+- Extend `BaseEntity` for common properties (id, createdAt, updatedAt)
+- Implement business rules and domain logic within entities
+- Make entities immutable - return new instances for state changes
+- Example pattern:
+```typescript
+export class Counter extends BaseEntity {
+  public readonly value: number;
+  
+  public increment(amount: number = 1): Counter {
+    return new Counter({
+      id: this.id,
+      value: this.value + amount,
+      createdAt: this.createdAt,
+      updatedAt: new Date(),
+    });
+  }
+}
+```
+
+## Repository Interfaces
+- Define contracts in `src/core/domain/repositories/`
+- Use clear, intention-revealing method names
+- Return domain entities, not database records
+- Example pattern:
+```typescript
+export interface ProductRepository {
+  getById(id: string): Promise<Product | null>;
+  save(product: Product): Promise<void>;
+  findByCategory(category: string): Promise<Product[]>;
+}
+```
+
+## Domain Rules
+- **NO** dependencies on outer layers (infrastructure, presentation)
+- **NO** framework-specific code (React, Prisma, etc.)
+- **NO** async operations in entity methods (pure functions only)
+- Focus on business logic and domain rules
+- Use meaningful domain language (ubiquitous language)
+
+## Value Objects
+- Represent concepts that don't have identity (e.g., Address, Money, Email)
+- Make them immutable
+- Implement validation in constructors
+- Override equality methods
+
+## Domain Events
+- Represent significant business events
+- Keep them simple and focused
+- Use past tense naming (e.g., `ProductCreated`, `OrderShipped`)

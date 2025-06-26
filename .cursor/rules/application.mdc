@@ -1,0 +1,101 @@
+---
+description: 
+globs: src/core/application/**/*
+alwaysApply: false
+---
+# Application Layer Rules
+
+## Location
+All application code lives in `src/core/application/`
+
+## Structure
+```
+src/core/application/
+├── use-cases/         # Business operations and workflows
+├── services/          # Application services
+├── dtos/             # Data Transfer Objects
+└── index.ts          # Barrel exports
+```
+
+## Use Case Guidelines
+- Organize by feature/domain (e.g., `counter/`, `product/`)
+- End class names with `UseCase`
+- Have single responsibility (one business operation)
+- Example pattern:
+```typescript
+export interface CreateProductRequest {
+  name: string;
+  price: number;
+  category: string;
+}
+
+export interface CreateProductResponse {
+  product: Product;
+}
+
+export class CreateProductUseCase {
+  constructor(private readonly productRepository: ProductRepository) {}
+
+  async execute(request: CreateProductRequest): Promise<CreateProductResponse> {
+    // 1. Validate input
+    // 2. Create domain entity
+    // 3. Apply business rules
+    // 4. Persist via repository
+    // 5. Return response
+  }
+}
+```
+
+## Dependency Rules
+- **ONLY** depend on domain layer
+- Inject repository interfaces (not implementations)
+- Use constructor injection
+- Define clear request/response DTOs
+
+## Error Handling
+- Throw descriptive errors for business rule violations
+- Use domain-specific exception types
+- Let infrastructure layer handle technical errors
+
+## Use Case Structure
+1. **Input validation** - Check request parameters
+2. **Business logic** - Apply domain rules using entities
+3. **Persistence** - Save changes via repositories
+4. **Response** - Return structured response with domain entities
+
+## Application Services
+- Coordinate multiple use cases
+- Handle cross-cutting concerns (logging, caching)
+- Orchestrate complex workflows
+- Don't contain business logic (delegate to use cases/entities)
+
+## DTOs (Data Transfer Objects)
+- Define clear contracts between layers
+- Use TypeScript interfaces
+- Include validation rules if needed
+- Keep them simple and focused
+- Example:
+```typescript
+export interface UpdateProductRequest {
+  id: string;
+  name?: string;
+  price?: number;
+  category?: string;
+}
+```
+
+## Testing
+- Unit test all use cases
+- Mock repository interfaces
+- Test business rule validation
+- Test error scenarios
+- Example test structure:
+```typescript
+describe('CreateProductUseCase', () => {
+  it('should create product successfully', async () => {
+    // Arrange: setup mocks and input
+    // Act: execute use case
+    // Assert: verify business rules and persistence
+  });
+});
+```

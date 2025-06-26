@@ -1,0 +1,123 @@
+---
+description: 
+globs: src/infrastructure/**/*
+alwaysApply: false
+---
+# Infrastructure Layer Rules
+
+## Location
+All infrastructure code lives in `src/infrastructure/`
+
+## Structure
+```
+src/infrastructure/
+├── repositories/      # Repository implementations
+├── prisma/           # Database client and configuration
+├── di/              # Dependency injection container
+└── index.ts         # Barrel exports
+```
+
+## Repository Implementation Guidelines
+- Implement domain repository interfaces
+- Use Prisma for database operations
+- Convert between database records and domain entities
+- Handle database-specific concerns (transactions, connections)
+- Example pattern:
+```typescript
+export class PrismaProductRepository implements ProductRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async getById(id: string): Promise<Product | null> {
+    const record = await this.prisma.product.findUnique({ where: { id } });
+    if (!record) return null;
+    
+    return new Product({
+      id: record.id,
+      name: record.name,
+      price: record.price,
+      // Map all fields from database to domain entity
+    });
+  }
+
+  async save(product: Product): Promise<void> {
+    await this.prisma.product.upsert({
+      where: { id: product.id },
+      update: {
+        name: product.name,
+        price: product.price,
+        updatedAt: product.updatedAt || new Date(),
+      },
+      create: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        createdAt: product.createdAt || new Date(),
+      },
+    });
+  }
+}
+```
+
+## Database Guidelines
+- Use Prisma as the ORM
+- Keep database schema in `prisma/schema.prisma`
+- Use singleton pattern for Prisma client (`src/infrastructure/prisma/client.ts`)
+- Apply migrations for schema changes: `npm run db:migrate`
+- Generate client after schema changes: `npm run db:generate`
+
+## Dependency Injection Container
+- Centralize all dependency wiring in `src/infrastructure/di/container.ts`
+- Wire from infrastructure → application → domain
+- Provide getter methods for each dependency
+- Example pattern:
+```typescript
+class DIContainer {
+  private dependencies: Dependencies;
+
+  constructor() {
+    // Infrastructure layer
+    const productRepository = new PrismaProductRepository(prisma);
+    
+    // Application layer
+    const createProductUseCase = new CreateProductUseCase(productRepository);
+    
+    this.dependencies = {
+      productRepository,
+      createProductUseCase,
+    };
+  }
+
+  getCreateProductUseCase(): CreateProductUseCase {
+    return this.dependencies.createProductUseCase;
+  }
+}
+```
+
+## External Services
+- Implement adapter pattern for third-party APIs
+- Use environment variables for configuration
+- Handle errors and retries appropriately
+- Create interfaces in domain layer, implement in infrastructure
+
+## Environment Configuration
+- Use `.env` files for environment variables
+- Provide defaults for development
+- Document required variables in README
+- Example variables:
+```env
+DATABASE_URL="file:./dev.db"
+API_KEY="your-api-key"
+NODE_ENV="development"
+```
+
+## Error Handling
+- Convert technical errors to domain-appropriate exceptions
+- Log infrastructure errors appropriately
+- Don't expose internal implementation details
+- Provide meaningful error messages
+
+## Testing
+- Write integration tests for repositories
+- Use test database for integration tests
+- Mock external services in tests
+- Test error scenarios and edge cases

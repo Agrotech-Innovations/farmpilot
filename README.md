@@ -1,6 +1,6 @@
-# TanStack Start Clean Architecture
+# Agrotech Innovations Farm Pilot
 
-A modern boilerplate for building full-stack React applications with TanStack Start, implementing **Clean Architecture** principles for maintainable, testable, and scalable code.
+A modern SaaS for managing and monitoring farms.
 
 ## 🚀 Tech Stack
 
@@ -38,8 +38,8 @@ A modern boilerplate for building full-stack React applications with TanStack St
 1. **Clone the repository:**
 
    ```bash
-   git clone git@github.com:felipestanzani/tanstack-start-ca.git
-   cd tanstack-start-ca
+   git clone git@github.com:Agrotech-Innovations/farmpilot.git
+   cd farmpilot
    ```
 
 2. **Install dependencies:**

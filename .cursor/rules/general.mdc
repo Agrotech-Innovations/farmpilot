@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# General Project Rules
+
+## Project Overview
+This is **Farm Pilot**, a modern SaaS application for farm management and monitoring built with Clean Architecture principles.
+
+## Key Technologies
+- **Frontend**: React 19.1.0, TanStack Start, TanStack Router, TypeScript 5.8.3
+- **Styling**: Tailwind CSS 4.1.11, shadcn/ui, Radix UI
+- **Backend**: TanStack Start Server Functions, Prisma ORM
+- **Database**: SQLite (development)
+- **Build Tool**: Vite 7.0.0
+- **Testing**: Vitest, jsdom
+- **Code Quality**: ESLint, Prettier
+
+## Architecture Principles
+Follow **Clean Architecture** with these layers:
+1. **Domain Layer** (`src/core/domain/`) - Pure business logic, no external dependencies
+2. **Application Layer** (`src/core/application/`) - Use cases and application services
+3. **Infrastructure Layer** (`src/infrastructure/`) - Database, repositories, external services
+4. **Presentation Layer** (`src/presentation/`, `src/routes/`) - Controllers, UI components
+
+## Dependency Rules
+- Dependencies always point inward: Presentation → Application → Domain
+- Infrastructure can depend on Domain and Application layers
+- Domain layer has no dependencies on outer layers
+- Use dependency injection container (`src/infrastructure/di/container.ts`)
+
+## File Organization
+- Use barrel exports (`index.ts`) for clean imports
+- Group related functionality in folders
+- Follow the established layer structure
+- Place tests alongside source code or in `src/tests/`
+
+## Naming Conventions
+- **Entities**: PascalCase (e.g., `Counter`, `Product`)
+- **Use Cases**: PascalCase ending with `UseCase` (e.g., `CreateProductUseCase`)
+- **Repositories**: PascalCase ending with `Repository` (e.g., `ProductRepository`)
+- **Controllers**: camelCase functions (e.g., `getCounter`, `createProduct`)
+- **Files**: kebab-case (e.g., `counter.entity.ts`, `get-counter.use-case.ts`)
+
+## Development Guidelines
+- Always use TypeScript with strict mode
+- Implement interfaces before concrete classes
+- Write tests for all business logic
+- Use Prisma for database operations
+- Follow shadcn/ui patterns for UI components
+- Use TanStack Router for routing
+- Implement server functions for API endpoints
+

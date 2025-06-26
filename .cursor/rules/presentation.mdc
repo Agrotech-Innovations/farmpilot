@@ -1,0 +1,137 @@
+---
+description: 
+globs: src/presentation/**/*,src/routes/**/*,src/components/**/*
+alwaysApply: false
+---
+# Presentation Layer Rules
+
+## Location
+Presentation code is split across:
+- `src/presentation/` - Controllers and HTTP handlers
+- `src/routes/` - File-based routing with TanStack Router
+- `src/components/` - React UI components
+
+## TanStack Start Controllers
+- Use `createServerFn` for server functions
+- Place in `src/presentation/controllers/`
+- Handle HTTP concerns (validation, serialization)
+- Delegate business logic to use cases
+- Example pattern:
+```typescript
+export const createProduct = createServerFn({ method: "POST" })
+  .validator((data: CreateProductRequest) => data)
+  .handler(async ({ data }) => {
+    const useCase = container.getCreateProductUseCase();
+    const result = await useCase.execute(data);
+    return result.product;
+  });
+```
+
+## File-Based Routing
+- Use TanStack Router in `src/routes/`
+- Create routes with `createFileRoute`
+- Use loaders for data fetching
+- Handle loading states and errors
+- Example pattern:
+```typescript
+export const Route = createFileRoute("/products")({
+  component: ProductsPage,
+  loader: async () => await getProducts(),
+});
+
+function ProductsPage() {
+  const products = Route.useLoaderData();
+  // Component implementation
+}
+```
+
+## React Components
+- Use functional components with hooks
+- Follow shadcn/ui patterns for UI components
+- Place reusable components in `src/components/`
+- Use TypeScript for all component props
+- Example patterns:
+```typescript
+interface ProductCardProps {
+  product: Product;
+  onEdit: (product: Product) => void;
+}
+
+export function ProductCard({ product, onEdit }: ProductCardProps) {
+  // Component implementation
+}
+```
+
+## UI Component Guidelines
+- Use shadcn/ui components from `src/components/ui/`
+- Follow Tailwind CSS utility-first approach
+- Use class variance authority (cva) for variant styling
+- Implement proper accessibility features
+- Use Radix UI primitives for complex components
+
+## State Management
+- Use TanStack Router for URL state
+- Use React hooks for local component state
+- Invalidate router data for cache updates
+- Example:
+```typescript
+const router = useRouter();
+
+const handleUpdate = async () => {
+  await updateProduct({ data: productData });
+  router.invalidate(); // Refresh loader data
+};
+```
+
+## Form Handling
+- Use controlled components
+- Implement client-side validation
+- Handle loading and error states
+- Provide clear user feedback
+- Example pattern:
+```typescript
+function ProductForm() {
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      await createProduct({ data: formData });
+      // Handle success
+    } catch (error) {
+      setErrors([error.message]);
+    } finally {
+      setLoading(false);
+    }
+  };
+}
+```
+
+## Error Handling
+- Use error boundaries for React errors
+- Display user-friendly error messages
+- Log errors for debugging
+- Provide fallback UI for errors
+
+## Styling Guidelines
+- Use Tailwind CSS utility classes
+- Follow shadcn/ui design system
+- Use CSS variables for theming
+- Implement responsive design
+- Support dark/light mode via ThemeProvider
+
+## Performance
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize images and assets
+- Use code splitting for large routes
+- Lazy load non-critical components
+
+## Testing
+- Test component rendering and behavior
+- Test user interactions (clicks, form submissions)
+- Test error states and loading states
+- Use React Testing Library patterns
+- Mock server functions in tests

@@ -1,0 +1,246 @@
+---
+description: 
+globs: src/components/**/*
+alwaysApply: false
+---
+# UI Components Rules
+
+## Component System
+- **Base**: shadcn/ui components in `src/components/ui/`
+- **Styling**: Tailwind CSS with utility-first approach
+- **Primitives**: Radix UI for accessibility and behavior
+- **Icons**: Lucide React
+- **Variants**: Class Variance Authority (cva) for styling variants
+
+## Component Structure
+- Place reusable components in `src/components/`
+- Use TypeScript for all component props
+- Follow shadcn/ui patterns and conventions
+- Example structure:
+```
+src/components/
+├── ui/                 # shadcn/ui base components
+│   ├── button.tsx
+│   ├── input.tsx
+│   └── card.tsx
+├── forms/             # Form-specific components
+├── layout/            # Layout components
+└── theme-provider.tsx # Theme management
+```
+
+## Button Component Pattern
+```typescript
+import { cva, type VariantProps } from "class-variance-authority"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-white hover:bg-destructive/90",
+        outline: "border bg-background hover:bg-accent hover:text-accent-foreground",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 px-3",
+        lg: "h-10 px-6",
+        icon: "size-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function Button({ className, variant, size, ...props }: ButtonProps) {
+  return (
+    <button
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
+}
+```
+
+## Styling Guidelines
+- Use Tailwind utility classes
+- Follow mobile-first responsive design
+- Use CSS variables for theming
+- Support dark/light mode
+- Common utility patterns:
+```css
+/* Spacing */
+p-4, m-2, gap-4, space-y-2
+
+/* Layout */
+flex, grid, items-center, justify-between
+
+/* Typography */
+text-sm, font-medium, text-muted-foreground
+
+/* Colors */
+bg-primary, text-primary-foreground, border-input
+
+/* States */
+hover:bg-primary/90, focus-visible:ring-2, disabled:opacity-50
+```
+
+## Form Components
+- Use controlled components with React state
+- Implement proper validation and error handling
+- Provide accessible labels and error messages
+- Example form pattern:
+```typescript
+function ProductForm() {
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: '',
+    price: 0,
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Product Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          className={errors.name ? "border-destructive" : ""}
+        />
+        {errors.name && (
+          <p className="text-sm text-destructive">{errors.name}</p>
+        )}
+      </div>
+      
+      <Button type="submit" disabled={loading}>
+        {loading ? "Creating..." : "Create Product"}
+      </Button>
+    </form>
+  );
+}
+```
+
+## Layout Components
+- Create reusable layout components
+- Use semantic HTML elements
+- Implement proper spacing and typography
+- Example layout pattern:
+```typescript
+function PageLayout({ children, title }: PageLayoutProps) {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      </header>
+      <main>{children}</main>
+    </div>
+  );
+}
+```
+
+## Theme Configuration
+- Use CSS variables for colors
+- Support system/light/dark theme preferences
+- Configure in `tailwind.config.js` and CSS variables
+- Theme switching with `ThemeProvider`:
+```typescript
+<ThemeProvider defaultTheme="system" storageKey="farm-pilot-theme">
+  <App />
+</ThemeProvider>
+```
+
+## Accessibility Guidelines
+- Use semantic HTML elements
+- Provide proper ARIA labels
+- Ensure keyboard navigation works
+- Test with screen readers
+- Use proper color contrast ratios
+- Example accessible component:
+```typescript
+function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Icon Usage
+- Use Lucide React for consistent icons
+- Size icons appropriately (16px, 20px, 24px)
+- Use semantic icon names
+- Example icon patterns:
+```typescript
+import { Plus, Edit, Trash2, ChevronRight } from "lucide-react"
+
+<Button>
+  <Plus className="size-4 mr-2" />
+  Add Product
+</Button>
+```
+
+## Component Composition
+- Build complex components from simple ones
+- Use compound component patterns
+- Provide flexible APIs
+- Example composition:
+```typescript
+function ProductCard({ product }: ProductCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{product.name}</CardTitle>
+        <CardDescription>{product.category}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold">${product.price}</p>
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline" size="sm">
+          <Edit className="size-4 mr-2" />
+          Edit
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+## Performance Considerations
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize images and assets
+- Use lazy loading for large lists
+- Debounce search inputs
+
+## Component Testing
+- Test component rendering
+- Test user interactions
+- Test accessibility features
+- Use React Testing Library
+- Example test:
+```typescript
+test('button renders with correct variant', () => {
+  render(<Button variant="destructive">Delete</Button>);
+  
+  const button = screen.getByRole('button', { name: 'Delete' });
+  expect(button).toHaveClass('bg-destructive');
+});
+```
+
+## Design System
+- Follow consistent spacing scale (4px base)
+- Use consistent typography scale
+- Maintain color palette consistency
+- Document component usage and examples
+- Create Storybook stories for complex components

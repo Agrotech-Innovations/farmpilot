@@ -1,16 +1,15 @@
 {
-  "name": "tanstack-start-clean-architecture",
+  "name": "Farm Pilot",
   "version": "1.0.0",
-  "description": "A TanStack Start boilerplate implementing Clean Architecture principles for maintainable, testable, and scalable React applications.",
+  "description": "Farm Pilot is a web application for managing and monitoring farms.",
   "main": "index.js",
   "keywords": [
-    "tanstack",
-    "react",
-    "clean-architecture",
-    "typescript",
-    "boilerplate"
+    "farm",
+    "pilot",
+    "agrotech"
   ],
-  "author": "Felipe Stanzani <stanzani@gmail.com>",
+  "author": "Agrotech Innovations LLC",
+  "homepage": "https://agrotechinnov.com",
   "license": "MIT",
   "type": "module",
   "scripts": {

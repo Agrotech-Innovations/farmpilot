@@ -1,0 +1,213 @@
+---
+description: 
+globs: src/tests/**/*
+alwaysApply: false
+---
+# Testing Rules
+
+## Testing Stack
+- **Framework**: Vitest
+- **Environment**: jsdom (for DOM testing)
+- **Setup**: `src/tests/setup.ts`
+- **Coverage**: Built-in Vitest coverage
+
+## Test Organization
+- Mirror source structure in `src/tests/`
+- Group tests by architectural layer
+- Use descriptive test file names ending with `.test.ts`
+- Example structure:
+```
+src/tests/
+├── domain/
+│   └── entities/
+│       └── product.entity.test.ts
+├── application/
+│   └── use-cases/
+│       └── create-product.use-case.test.ts
+├── infrastructure/
+│   └── repositories/
+│       └── prisma-product.repository.test.ts
+└── setup.ts
+```
+
+## Domain Layer Testing
+- Test business logic and entity behavior
+- Use pure unit tests (no mocking needed)
+- Test domain rules and validations
+- Example pattern:
+```typescript
+describe('Product Entity', () => {
+  it('should calculate discounted price correctly', () => {
+    // Arrange
+    const product = new Product({ id: '1', name: 'Test', price: 100 });
+    
+    // Act
+    const discounted = product.applyDiscount(0.1);
+    
+    // Assert
+    expect(discounted.price).toBe(90);
+  });
+  
+  it('should throw error for invalid discount', () => {
+    const product = new Product({ id: '1', name: 'Test', price: 100 });
+    
+    expect(() => product.applyDiscount(-0.1)).toThrow('Invalid discount');
+  });
+});
+```
+
+## Application Layer Testing
+- Test use case orchestration
+- Mock repository interfaces
+- Test error handling and validation
+- Example pattern:
+```typescript
+describe('CreateProductUseCase', () => {
+  let useCase: CreateProductUseCase;
+  let mockRepository: MockProductRepository;
+  
+  beforeEach(() => {
+    mockRepository = new MockProductRepository();
+    useCase = new CreateProductUseCase(mockRepository);
+  });
+  
+  it('should create product successfully', async () => {
+    // Arrange
+    const request = { name: 'Test Product', price: 100 };
+    
+    // Act
+    const result = await useCase.execute(request);
+    
+    // Assert
+    expect(result.product.name).toBe('Test Product');
+    expect(mockRepository.saveCalled).toBe(true);
+  });
+});
+```
+
+## Infrastructure Layer Testing
+- Write integration tests for repositories
+- Use test database
+- Test database operations and mappings
+- Example pattern:
+```typescript
+describe('PrismaProductRepository', () => {
+  let repository: PrismaProductRepository;
+  let prisma: PrismaClient;
+  
+  beforeEach(async () => {
+    prisma = new PrismaClient();
+    repository = new PrismaProductRepository(prisma);
+    
+    // Clean database
+    await prisma.product.deleteMany();
+  });
+  
+  it('should save and retrieve product', async () => {
+    // Arrange
+    const product = new Product({ id: '1', name: 'Test', price: 100 });
+    
+    // Act
+    await repository.save(product);
+    const retrieved = await repository.getById('1');
+    
+    // Assert
+    expect(retrieved?.name).toBe('Test');
+  });
+});
+```
+
+## Presentation Layer Testing
+- Test component rendering and behavior
+- Test user interactions
+- Mock server functions
+- Use React Testing Library patterns
+- Example pattern:
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+
+describe('ProductForm', () => {
+  it('should submit form with valid data', async () => {
+    // Arrange
+    const mockSubmit = vi.fn();
+    render(<ProductForm onSubmit={mockSubmit} />);
+    
+    // Act
+    fireEvent.change(screen.getByLabelText('Product Name'), {
+      target: { value: 'Test Product' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    
+    // Assert
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        name: 'Test Product'
+      });
+    });
+  });
+});
+```
+
+## Mock Patterns
+- Create mock implementations for repositories
+- Use Vitest's `vi.fn()` for function mocking
+- Mock external services and APIs
+- Example mock repository:
+```typescript
+class MockProductRepository implements ProductRepository {
+  private products: Product[] = [];
+  public saveCalled = false;
+  
+  async save(product: Product): Promise<void> {
+    this.saveCalled = true;
+    this.products.push(product);
+  }
+  
+  async getById(id: string): Promise<Product | null> {
+    return this.products.find(p => p.id === id) || null;
+  }
+}
+```
+
+## Test Data Factories
+- Create factory functions for test data
+- Use realistic but predictable data
+- Make factories flexible with parameters
+- Example factory:
+```typescript
+export function createTestProduct(overrides: Partial<ProductProps> = {}): Product {
+  return new Product({
+    id: 'test-id',
+    name: 'Test Product',
+    price: 100,
+    createdAt: new Date(),
+    ...overrides
+  });
+}
+```
+
+## Test Commands
+- `npm test` - Run tests in watch mode
+- `npm run test:run` - Run tests once
+- `npm run test:coverage` - Run with coverage report
+
+## Best Practices
+- Write tests first (TDD) when possible
+- Keep tests simple and focused
+- Use descriptive test names
+- Arrange-Act-Assert pattern
+- Test both happy path and error cases
+- Avoid testing implementation details
+- Mock at the boundary between layers
+
+## Coverage Goals
+- Aim for high coverage on business logic (domain/application)
+- Focus on critical paths and edge cases
+- Don't chase 100% coverage blindly
+- Use coverage to find untested code paths
+
+## Continuous Integration
+- Run tests on every commit
+- Fail builds on test failures
+- Include coverage reports in CI
+- Test against multiple environments if needed

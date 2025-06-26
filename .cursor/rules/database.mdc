@@ -1,0 +1,163 @@
+---
+description: 
+globs: prisma/**/*,src/infrastructure/prisma/**/*
+alwaysApply: false
+---
+# Database Rules
+
+## Technology Stack
+- **ORM**: Prisma
+- **Database**: SQLite (development), can be configured for PostgreSQL/MySQL
+- **Schema Location**: `prisma/schema.prisma`
+- **Client**: Singleton pattern in `src/infrastructure/prisma/client.ts`
+
+## Schema Design Guidelines
+- Use descriptive model names (PascalCase)
+- Include common fields: `id`, `createdAt`, `updatedAt`
+- Use appropriate field types and constraints
+- Define relationships clearly
+- Example model:
+```prisma
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  category    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  orders      OrderItem[]
+  
+  @@map("products")
+}
+```
+
+## Migration Strategy
+- Always create migrations for schema changes
+- Use descriptive migration names
+- Test migrations on sample data
+- Commands:
+  - `npm run db:migrate` - Create and apply migration
+  - `npm run db:push` - Push schema changes (development only)
+  - `npm run db:generate` - Generate Prisma client
+
+## Query Patterns
+- Use repository pattern to encapsulate queries
+- Handle null cases appropriately
+- Use transactions for multi-table operations
+- Optimize queries with proper includes/selects
+- Example patterns:
+```typescript
+// Simple find
+const product = await this.prisma.product.findUnique({
+  where: { id },
+  include: { category: true }
+});
+
+// Complex query with filtering
+const products = await this.prisma.product.findMany({
+  where: {
+    isActive: true,
+    category: { name: categoryName }
+  },
+  orderBy: { createdAt: 'desc' },
+  take: 10,
+  skip: offset
+});
+
+// Transaction
+await this.prisma.$transaction(async (tx) => {
+  await tx.product.create({ data: productData });
+  await tx.inventory.update({ where: { productId }, data: { quantity } });
+});
+```
+
+## Data Validation
+- Use Prisma schema constraints
+- Implement validation in domain entities
+- Add database-level constraints where appropriate
+- Use Zod for runtime validation if needed
+
+## Performance Guidelines
+- Use proper indexes for frequently queried fields
+- Avoid N+1 queries with proper includes
+- Use connection pooling for production
+- Monitor query performance
+- Example index usage:
+```prisma
+model Product {
+  name     String
+  category String
+  
+  @@index([category])
+  @@index([name, category])
+}
+```
+
+## Environment Configuration
+- Use environment variables for database URLs
+- Different configs for development/test/production
+- Example `.env`:
+```env
+# Development
+DATABASE_URL="file:./dev.db"
+
+# Production
+DATABASE_URL="postgresql://user:password@localhost:5432/farmdb"
+```
+
+## Testing Database
+- Use separate test database
+- Clean database between tests
+- Use factories for test data creation
+- Example test setup:
+```typescript
+beforeEach(async () => {
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+});
+```
+
+## Backup and Recovery
+- Regular database backups in production
+- Test restore procedures
+- Document recovery steps
+- Use Prisma migrations for schema versioning
+
+## Common Fields Pattern
+- Always include: `id`, `createdAt`, `updatedAt`
+- Use `String` for IDs (supports UUIDs/CUIDs)
+- Use `DateTime` for timestamps
+- Example base pattern:
+```prisma
+model BaseModel {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Relationship Guidelines
+- Use descriptive relation names
+- Define both sides of relationships
+- Use cascading deletes carefully
+- Document complex relationships
+- Example relationship:
+```prisma
+model User {
+  id       String    @id
+  farms    Farm[]    @relation("UserFarms")
+  ownedBy  Farm?     @relation("FarmOwner")
+}
+
+model Farm {
+  id       String @id
+  ownerId  String @unique
+  owner    User   @relation("FarmOwner", fields: [ownerId], references: [id])
+  members  User[] @relation("UserFarms")
+}
+```
