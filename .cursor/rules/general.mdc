@@ -51,4 +51,6 @@ Follow **Clean Architecture** with these layers:
 - Follow shadcn/ui patterns for UI components
 - Use TanStack Router for routing
 - Implement server functions for API endpoints
+- Always use the @ path alias.
+- Always use the color variables defined in src/styles/app.css for styling.
 
