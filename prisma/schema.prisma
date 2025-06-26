@@ -10,6 +10,484 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ======================
+// Authentication & Multi-tenancy
+// ======================
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  phone             String?
+  isEmailVerified   Boolean             @default(false)
+  emailVerifiedAt   DateTime?
+  lastLoginAt       DateTime?
+  
+  // Two-Factor Authentication
+  twoFactorEnabled  Boolean             @default(false)
+  twoFactorSecret   String?
+  twoFactorBackupCodes String?          // JSON array of backup codes
+  
+  // OAuth
+  oauthProviders    OAuthProvider[]
+  
+  // Multi-tenancy
+  organizationMemberships OrganizationMember[]
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@map("users")
+}
+
+model OAuthProvider {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      String    // google, github, etc.
+  providerId    String    // ID from the OAuth provider
+  accessToken   String?
+  refreshToken  String?
+  expiresAt     DateTime?
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([provider, providerId])
+  @@map("oauth_providers")
+}
+
+model Organization {
+  id              String              @id @default(cuid())
+  name            String
+  slug            String              @unique
+  description     String?
+  
+  // Subscription/billing info
+  subscriptionPlan String             @default("free") // free, basic, premium
+  subscriptionStatus String           @default("active") // active, canceled, past_due
+  
+  members         OrganizationMember[]
+  farms           Farm[]
+  
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id              String      @id @default(cuid())
+  userId          String
+  organizationId  String
+  role            String      @default("member") // owner, admin, member, viewer
+  
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@unique([userId, organizationId])
+  @@map("organization_members")
+}
+
+// ======================
+// Core Farm Entities
+// ======================
+
+model Farm {
+  id              String          @id @default(cuid())
+  organizationId  String
+  name            String
+  description     String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  totalAcres      Float?
+  farmType        String?         // crop, livestock, mixed, organic, etc.
+  
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Farm components
+  fields          Field[]
+  crops           Crop[]
+  livestock       LivestockGroup[]
+  tasks           Task[]
+  inventoryItems  InventoryItem[]
+  equipment       Equipment[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("farms")
+}
+
+model Field {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  description     String?
+  acres           Float
+  soilType        String?
+  
+  // Location data
+  coordinates     String?         // GeoJSON polygon
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  crops           Crop[]
+  soilTests       SoilTest[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("fields")
+}
+
+// ======================
+// Crop Management
+// ======================
+
+model Crop {
+  id              String          @id @default(cuid())
+  farmId          String
+  fieldId         String?
+  
+  // Crop details
+  name            String
+  variety         String?
+  plantingDate    DateTime?
+  expectedHarvestDate DateTime?
+  actualHarvestDate DateTime?
+  
+  // Planning
+  plannedAcres    Float?
+  actualAcres     Float?
+  seedsPerAcre    Float?
+  
+  // Status
+  status          String          @default("planned") // planned, planted, growing, harvested, failed
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  field           Field?          @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  
+  // Related data
+  yields          CropYield[]
+  treatments      CropTreatment[]
+  tasks           Task[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crops")
+}
+
+model CropYield {
+  id              String          @id @default(cuid())
+  cropId          String
+  harvestDate     DateTime
+  quantity        Float
+  unit            String          @default("bushels") // bushels, tons, lbs, etc.
+  quality         String?         // grade A, B, etc.
+  marketPrice     Float?
+  
+  crop            Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crop_yields")
+}
+
+model CropTreatment {
+  id              String          @id @default(cuid())
+  cropId          String
+  treatmentType   String          // fertilizer, pesticide, herbicide, irrigation
+  product         String
+  quantity        Float
+  unit            String
+  applicationDate DateTime
+  applicationMethod String?
+  targetPestDisease String?
+  effectiveness   String?         // poor, fair, good, excellent
+  cost            Float?
+  
+  crop            Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crop_treatments")
+}
+
+model SoilTest {
+  id              String          @id @default(cuid())
+  fieldId         String
+  testDate        DateTime
+  phLevel         Float?
+  nitrogen        Float?
+  phosphorus      Float?
+  potassium       Float?
+  organicMatter   Float?
+  recommendations String?         // Text recommendations
+  
+  field           Field           @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("soil_tests")
+}
+
+// ======================
+// Livestock Management
+// ======================
+
+model LivestockGroup {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  species         String          // cattle, sheep, goats, pigs, chickens, etc.
+  breed           String?
+  currentCount    Int             @default(0)
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animals         LivestockAnimal[]
+  grazingRecords  GrazingRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("livestock_groups")
+}
+
+model LivestockAnimal {
+  id              String          @id @default(cuid())
+  groupId         String
+  tagNumber       String
+  name            String?
+  sex             String          // male, female
+  birthDate       DateTime?
+  breed           String?
+  motherTagNumber String?
+  fatherTagNumber String?
+  
+  // Health and status
+  currentWeight   Float?
+  healthStatus    String          @default("healthy") // healthy, sick, injured, deceased
+  
+  group           LivestockGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  healthRecords   HealthRecord[]
+  breedingRecords BreedingRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@unique([groupId, tagNumber])
+  @@map("livestock_animals")
+}
+
+model HealthRecord {
+  id              String          @id @default(cuid())
+  animalId        String
+  recordType      String          // vaccination, treatment, checkup, injury, illness
+  description     String
+  treatment       String?
+  medication      String?
+  dosage          String?
+  veterinarian    String?
+  cost            Float?
+  notes           String?
+  
+  animal          LivestockAnimal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("health_records")
+}
+
+model BreedingRecord {
+  id              String          @id @default(cuid())
+  motherAnimalId  String
+  fatherAnimalId  String?
+  breedingDate    DateTime
+  expectedBirthDate DateTime?
+  actualBirthDate DateTime?
+  pregnancyStatus String          @default("bred") // bred, confirmed, aborted, birthed
+  offspringCount  Int?
+  notes           String?
+  
+  mother          LivestockAnimal @relation(fields: [motherAnimalId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("breeding_records")
+}
+
+model GrazingRecord {
+  id              String          @id @default(cuid())
+  groupId         String
+  pastureLocation String
+  startDate       DateTime
+  endDate         DateTime?
+  animalCount     Int
+  pastureCondition String?        // excellent, good, fair, poor
+  notes           String?
+  
+  group           LivestockGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("grazing_records")
+}
+
+// ======================
+// Task Management
+// ======================
+
+model Task {
+  id              String          @id @default(cuid())
+  farmId          String
+  cropId          String?
+  title           String
+  description     String?
+  priority        String          @default("medium") // low, medium, high, urgent
+  status          String          @default("pending") // pending, in_progress, completed, cancelled
+  
+  // Assignment
+  assignedToEmail String?
+  assignedToName  String?
+  
+  // Scheduling
+  dueDate         DateTime?
+  scheduledDate   DateTime?
+  completedDate   DateTime?
+  estimatedHours  Float?
+  actualHours     Float?
+  
+  // Categories
+  category        String?         // planting, harvesting, maintenance, feeding, etc.
+  tags            String?         // JSON array of tags
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  crop            Crop?           @relation(fields: [cropId], references: [id], onDelete: SetNull)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("tasks")
+}
+
+// ======================
+// Inventory Management
+// ======================
+
+model InventoryItem {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  category        String          // seeds, fertilizers, feed, tools, harvested_produce
+  subcategory     String?
+  description     String?
+  
+  // Quantity tracking
+  currentQuantity Float           @default(0)
+  unit            String          @default("units") // kg, lbs, gallons, units, etc.
+  minimumQuantity Float?          // Alert threshold
+  
+  // Cost tracking
+  unitCost        Float?
+  totalValue      Float?
+  supplier        String?
+  
+  // Product details
+  sku             String?
+  brand           String?
+  expirationDate  DateTime?
+  storageLocation String?
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  transactions    InventoryTransaction[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("inventory_items")
+}
+
+model InventoryTransaction {
+  id              String          @id @default(cuid())
+  itemId          String
+  transactionType String          // purchase, usage, sale, adjustment, waste
+  quantity        Float
+  unitCost        Float?
+  totalCost       Float?
+  notes           String?
+  referenceNumber String?         // Invoice number, etc.
+  
+  item            InventoryItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("inventory_transactions")
+}
+
+// ======================
+// Equipment Management
+// ======================
+
+model Equipment {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  type            String          // tractor, plow, harvester, etc.
+  brand           String?
+  model           String?
+  serialNumber    String?
+  purchaseDate    DateTime?
+  purchasePrice   Float?
+  currentValue    Float?
+  
+  // Status
+  status          String          @default("operational") // operational, maintenance, broken, retired
+  location        String?
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  maintenanceRecords MaintenanceRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("equipment")
+}
+
+model MaintenanceRecord {
+  id              String          @id @default(cuid())
+  equipmentId     String
+  maintenanceType String          // routine, repair, inspection, replacement
+  description     String
+  cost            Float?
+  performedBy     String?
+  serviceProvider String?
+  nextServiceDate DateTime?
+  notes           String?
+  
+  equipment       Equipment       @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("maintenance_records")
+}
+
+// Keep the original Counter model for backward compatibility during migration
 model Counter {
   id        String   @id
   value     Int      @default(0)
