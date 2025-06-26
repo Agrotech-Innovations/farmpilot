@@ -1,4 +1,4 @@
-import {Farm} from '../entities';
+import {Farm} from '@/core/domain/entities';
 
 export interface FarmRepository {
   // Basic CRUD operations

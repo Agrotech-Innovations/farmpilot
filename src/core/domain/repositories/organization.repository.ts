@@ -1,4 +1,4 @@
-import {Organization} from '../entities';
+import {Organization} from '@/core/domain/entities';
 
 export interface OrganizationRepository {
   // Basic CRUD operations

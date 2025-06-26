@@ -1,3 +1,4 @@
-export * from '@/core/application/use-cases/auth/register-user.use-case';
-export * from '@/core/application/use-cases/auth/login-user.use-case';
-export * from '@/core/application/use-cases/auth/enable-two-factor.use-case';
+export * from './register-user.use-case';
+export * from './login-user.use-case';
+export * from './enable-two-factor.use-case';
+export * from './oauth-login.use-case';

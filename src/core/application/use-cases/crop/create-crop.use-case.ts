@@ -1,5 +1,5 @@
-import {Crop} from '../../../domain/entities';
-import {CropRepository, FarmRepository} from '../../../domain/repositories';
+import {Crop} from '@/core/domain/entities';
+import {CropRepository, FarmRepository} from '@/core/domain/repositories';
 import {randomUUID} from 'crypto';
 
 export interface CreateCropRequest {

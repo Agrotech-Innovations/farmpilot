@@ -1,10 +1,10 @@
 import {createServerFn} from '@tanstack/react-start';
-import {container} from '../../infrastructure/di/container';
+import {container} from '@/infrastructure/di/container';
 import {
   RegisterUserUseCase,
   LoginUserUseCase,
   EnableTwoFactorUseCase
-} from '../../core/application/use-cases/auth';
+} from '@/core/application/use-cases/auth';
 import {z} from 'zod';
 
 // Validation schemas

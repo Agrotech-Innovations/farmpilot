@@ -1,5 +1,5 @@
-import {Crop} from '../../../domain/entities';
-import {CropRepository, FieldRepository} from '../../../domain/repositories';
+import {Crop} from '@/core/domain/entities';
+import {CropRepository, FieldRepository} from '@/core/domain/repositories';
 
 export interface PlanCropPlantingRequest {
   cropId: string;

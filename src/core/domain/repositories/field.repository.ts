@@ -1,4 +1,4 @@
-import {Field} from '../entities';
+import {Field} from '@/core/domain/entities';
 
 export interface FieldRepository {
   // Basic CRUD operations

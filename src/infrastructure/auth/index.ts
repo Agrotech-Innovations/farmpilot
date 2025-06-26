@@ -1,1 +1,1 @@
-export * from './jwt.service';
+export * from '@/infrastructure/auth/jwt.service';

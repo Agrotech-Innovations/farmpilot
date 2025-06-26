@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import {User} from '../../core/domain/entities';
+import {User} from '@/core/domain/entities';
 
 export interface JwtPayload {
   userId: string;

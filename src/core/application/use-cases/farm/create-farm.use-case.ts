@@ -1,6 +1,6 @@
-import {Farm} from '../../../domain/entities';
-import {FarmRepository} from '../../../domain/repositories';
-import {OrganizationRepository} from '../../../domain/repositories';
+import {Farm} from '@/core/domain/entities';
+import {FarmRepository} from '@/core/domain/repositories';
+import {OrganizationRepository} from '@/core/domain/repositories';
 import {randomUUID} from 'crypto';
 
 export interface CreateFarmRequest {

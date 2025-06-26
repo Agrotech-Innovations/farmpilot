@@ -1,9 +1,9 @@
 import {createServerFn} from '@tanstack/react-start';
-import {container} from '../../infrastructure/di/container';
+import {container} from '@/infrastructure/di/container';
 import {
   CreateFarmUseCase,
   ListFarmsUseCase
-} from '../../core/application/use-cases/farm';
+} from '@/core/application/use-cases/farm';
 import {z} from 'zod';
 
 // Validation schemas

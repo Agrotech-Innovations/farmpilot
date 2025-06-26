@@ -1,5 +1,21 @@
 import {User} from '../entities';
 
+export interface OAuthProviderData {
+  userId: string;
+  provider: string;
+  providerId: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: Date;
+}
+
+export interface UserOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+}
+
 export interface UserRepository {
   // Basic CRUD operations
   getById(id: string): Promise<User | null>;
@@ -16,6 +32,17 @@ export interface UserRepository {
     email: string,
     passwordHash: string
   ): Promise<User | null>;
+
+  // OAuth authentication
+  saveOAuthProvider(data: OAuthProviderData): Promise<void>;
+  findByOAuthProvider(
+    provider: string,
+    providerId: string
+  ): Promise<User | null>;
+  removeOAuthProvider(userId: string, provider: string): Promise<void>;
+
+  // Organization management
+  findUserOrganizations(userId: string): Promise<UserOrganization[]>;
 
   // Two-factor authentication
   updateTwoFactorSecret(

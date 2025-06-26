@@ -1,5 +1,5 @@
-import {Farm} from '../../../domain/entities';
-import {FarmRepository} from '../../../domain/repositories';
+import {Farm} from '@/core/domain/entities';
+import {FarmRepository} from '@/core/domain/repositories';
 
 export interface ListFarmsRequest {
   organizationId: string;

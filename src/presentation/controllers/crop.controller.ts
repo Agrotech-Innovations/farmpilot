@@ -1,9 +1,9 @@
 import {createServerFn} from '@tanstack/react-start';
-import {container} from '../../infrastructure/di/container';
+import {container} from '@/infrastructure/di/container';
 import {
   CreateCropUseCase,
   PlanCropPlantingUseCase
-} from '../../core/application/use-cases/crop';
+} from '@/core/application/use-cases/crop';
 import {z} from 'zod';
 
 // Validation schemas
