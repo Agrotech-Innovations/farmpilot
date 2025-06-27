@@ -1,34 +1,167 @@
-import { CounterRepository } from "@/core/domain/repositories";
+import {
+  CounterRepository,
+  UserRepository,
+  FarmRepository,
+  OrganizationRepository,
+  FieldRepository,
+  CropRepository,
+  TaskRepository
+} from '@/core/domain/repositories';
 import {
   GetCounterUseCase,
   IncrementCounterUseCase,
-} from "@/core/application/use-cases";
-import { PrismaCounterRepository } from "@/infrastructure/repositories";
-import { prisma } from "@/infrastructure/prisma/client";
+  RegisterUserUseCase,
+  LoginUserUseCase,
+  EnableTwoFactorUseCase,
+  OAuthLoginUseCase,
+  CreateFarmUseCase,
+  GetFarmUseCase,
+  ListFarmsUseCase,
+  UpdateFarmUseCase,
+  DeleteFarmUseCase,
+  CreateCropUseCase,
+  PlanCropPlantingUseCase,
+  CreateFieldUseCase,
+  ListFieldsUseCase,
+  CreateTaskUseCase,
+  ListTasksUseCase,
+  UpdateTaskStatusUseCase
+} from '@/core/application/use-cases';
+import {
+  PrismaCounterRepository,
+  PrismaUserRepository,
+  PrismaFarmRepository,
+  PrismaOrganizationRepository,
+  PrismaFieldRepository,
+  PrismaCropRepository,
+  PrismaTaskRepository
+} from '@/infrastructure/repositories';
+import {prisma} from '@/infrastructure/prisma/client';
 
 export interface Dependencies {
+  // Repositories
   counterRepository: CounterRepository;
+  userRepository: UserRepository;
+  farmRepository: FarmRepository;
+  organizationRepository: OrganizationRepository;
+  fieldRepository: FieldRepository;
+  cropRepository: CropRepository;
+  taskRepository: TaskRepository;
+
+  // Use Cases
   getCounterUseCase: GetCounterUseCase;
   incrementCounterUseCase: IncrementCounterUseCase;
+  registerUserUseCase: RegisterUserUseCase;
+  loginUserUseCase: LoginUserUseCase;
+  enableTwoFactorUseCase: EnableTwoFactorUseCase;
+  oauthLoginUseCase: OAuthLoginUseCase;
+  createFarmUseCase: CreateFarmUseCase;
+  getFarmUseCase: GetFarmUseCase;
+  listFarmsUseCase: ListFarmsUseCase;
+  updateFarmUseCase: UpdateFarmUseCase;
+  deleteFarmUseCase: DeleteFarmUseCase;
+  createCropUseCase: CreateCropUseCase;
+  planCropPlantingUseCase: PlanCropPlantingUseCase;
+  createFieldUseCase: CreateFieldUseCase;
+  listFieldsUseCase: ListFieldsUseCase;
+  createTaskUseCase: CreateTaskUseCase;
+  listTasksUseCase: ListTasksUseCase;
+  updateTaskStatusUseCase: UpdateTaskStatusUseCase;
 }
 
 class DIContainer {
   private dependencies: Dependencies;
 
   constructor() {
-    // Infrastructure layer
+    // Infrastructure layer - Repositories
     const counterRepository = new PrismaCounterRepository(prisma);
+    const userRepository = new PrismaUserRepository(prisma);
+    const organizationRepository = new PrismaOrganizationRepository(prisma);
+    const farmRepository = new PrismaFarmRepository(prisma);
+    const fieldRepository = new PrismaFieldRepository(prisma);
+    const cropRepository = new PrismaCropRepository(prisma);
+    const taskRepository = new PrismaTaskRepository(prisma);
 
-    // Application layer
+    // Application layer - Use Cases
     const getCounterUseCase = new GetCounterUseCase(counterRepository);
     const incrementCounterUseCase = new IncrementCounterUseCase(
-      counterRepository,
+      counterRepository
     );
 
+    const registerUserUseCase = new RegisterUserUseCase(
+      userRepository,
+      organizationRepository
+    );
+    const loginUserUseCase = new LoginUserUseCase(userRepository);
+    const enableTwoFactorUseCase = new EnableTwoFactorUseCase(userRepository);
+    const oauthLoginUseCase = new OAuthLoginUseCase(userRepository);
+
+    const createFarmUseCase = new CreateFarmUseCase(
+      farmRepository,
+      organizationRepository
+    );
+    const getFarmUseCase = new GetFarmUseCase(farmRepository);
+    const listFarmsUseCase = new ListFarmsUseCase(farmRepository);
+    const updateFarmUseCase = new UpdateFarmUseCase(farmRepository);
+    const deleteFarmUseCase = new DeleteFarmUseCase(farmRepository);
+
+    const createCropUseCase = new CreateCropUseCase(
+      cropRepository,
+      farmRepository
+    );
+    const planCropPlantingUseCase = new PlanCropPlantingUseCase(
+      cropRepository,
+      fieldRepository
+    );
+
+    const createFieldUseCase = new CreateFieldUseCase(
+      fieldRepository,
+      farmRepository
+    );
+    const listFieldsUseCase = new ListFieldsUseCase(
+      fieldRepository,
+      farmRepository
+    );
+
+    const createTaskUseCase = new CreateTaskUseCase(
+      taskRepository,
+      farmRepository
+    );
+    const listTasksUseCase = new ListTasksUseCase(
+      taskRepository,
+      farmRepository
+    );
+    const updateTaskStatusUseCase = new UpdateTaskStatusUseCase(taskRepository);
+
     this.dependencies = {
+      // Repositories
       counterRepository,
+      userRepository,
+      farmRepository,
+      organizationRepository,
+      fieldRepository,
+      cropRepository,
+      taskRepository,
+
+      // Use Cases
       getCounterUseCase,
       incrementCounterUseCase,
+      registerUserUseCase,
+      loginUserUseCase,
+      enableTwoFactorUseCase,
+      oauthLoginUseCase,
+      createFarmUseCase,
+      getFarmUseCase,
+      listFarmsUseCase,
+      updateFarmUseCase,
+      deleteFarmUseCase,
+      createCropUseCase,
+      planCropPlantingUseCase,
+      createFieldUseCase,
+      listFieldsUseCase,
+      createTaskUseCase,
+      listTasksUseCase,
+      updateTaskStatusUseCase
     };
   }
 

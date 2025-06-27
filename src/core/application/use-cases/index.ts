@@ -6,3 +6,5 @@ export * from './crop';
 export * from './livestock';
 export * from './inventory';
 export * from './equipment';
+export * from './field';
+export * from './task';
