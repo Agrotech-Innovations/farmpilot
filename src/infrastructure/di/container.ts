@@ -28,7 +28,13 @@ import {
   ListFieldsUseCase,
   CreateTaskUseCase,
   ListTasksUseCase,
-  UpdateTaskStatusUseCase
+  UpdateTaskStatusUseCase,
+  CreateLivestockGroupUseCase,
+  AddLivestockAnimalUseCase,
+  CreateInventoryItemUseCase,
+  RecordInventoryTransactionUseCase,
+  CreateEquipmentUseCase,
+  ScheduleMaintenanceUseCase
 } from '@/core/application/use-cases';
 import {
   PrismaCounterRepository,
@@ -76,6 +82,12 @@ export interface Dependencies {
   createTaskUseCase: CreateTaskUseCase;
   listTasksUseCase: ListTasksUseCase;
   updateTaskStatusUseCase: UpdateTaskStatusUseCase;
+  createLivestockGroupUseCase: CreateLivestockGroupUseCase;
+  addLivestockAnimalUseCase: AddLivestockAnimalUseCase;
+  createInventoryItemUseCase: CreateInventoryItemUseCase;
+  recordInventoryTransactionUseCase: RecordInventoryTransactionUseCase;
+  createEquipmentUseCase: CreateEquipmentUseCase;
+  scheduleMaintenanceUseCase: ScheduleMaintenanceUseCase;
 }
 
 class DIContainer {
@@ -145,6 +157,26 @@ class DIContainer {
     );
     const updateTaskStatusUseCase = new UpdateTaskStatusUseCase(taskRepository);
 
+    const createLivestockGroupUseCase = new CreateLivestockGroupUseCase(
+      livestockRepository
+    );
+    const addLivestockAnimalUseCase = new AddLivestockAnimalUseCase(
+      livestockRepository
+    );
+
+    const createInventoryItemUseCase = new CreateInventoryItemUseCase(
+      inventoryRepository
+    );
+    const recordInventoryTransactionUseCase =
+      new RecordInventoryTransactionUseCase(inventoryRepository);
+
+    const createEquipmentUseCase = new CreateEquipmentUseCase(
+      equipmentRepository
+    );
+    const scheduleMaintenanceUseCase = new ScheduleMaintenanceUseCase(
+      equipmentRepository
+    );
+
     this.dependencies = {
       // Repositories
       counterRepository,
@@ -176,7 +208,13 @@ class DIContainer {
       listFieldsUseCase,
       createTaskUseCase,
       listTasksUseCase,
-      updateTaskStatusUseCase
+      updateTaskStatusUseCase,
+      createLivestockGroupUseCase,
+      addLivestockAnimalUseCase,
+      createInventoryItemUseCase,
+      recordInventoryTransactionUseCase,
+      createEquipmentUseCase,
+      scheduleMaintenanceUseCase
     };
   }
 
@@ -194,6 +232,55 @@ class DIContainer {
 
   getIncrementCounterUseCase(): IncrementCounterUseCase {
     return this.dependencies.incrementCounterUseCase;
+  }
+
+  // Livestock Use Cases
+  getCreateLivestockGroupUseCase(): CreateLivestockGroupUseCase {
+    return this.dependencies.createLivestockGroupUseCase;
+  }
+
+  getAddLivestockAnimalUseCase(): AddLivestockAnimalUseCase {
+    return this.dependencies.addLivestockAnimalUseCase;
+  }
+
+  // Inventory Use Cases
+  getCreateInventoryItemUseCase(): CreateInventoryItemUseCase {
+    return this.dependencies.createInventoryItemUseCase;
+  }
+
+  getRecordInventoryTransactionUseCase(): RecordInventoryTransactionUseCase {
+    return this.dependencies.recordInventoryTransactionUseCase;
+  }
+
+  // Equipment Use Cases
+  getCreateEquipmentUseCase(): CreateEquipmentUseCase {
+    return this.dependencies.createEquipmentUseCase;
+  }
+
+  getScheduleMaintenanceUseCase(): ScheduleMaintenanceUseCase {
+    return this.dependencies.scheduleMaintenanceUseCase;
+  }
+
+  // Task Use Cases
+  getCreateTaskUseCase(): CreateTaskUseCase {
+    return this.dependencies.createTaskUseCase;
+  }
+
+  getListTasksUseCase(): ListTasksUseCase {
+    return this.dependencies.listTasksUseCase;
+  }
+
+  getUpdateTaskStatusUseCase(): UpdateTaskStatusUseCase {
+    return this.dependencies.updateTaskStatusUseCase;
+  }
+
+  // Field Use Cases
+  getCreateFieldUseCase(): CreateFieldUseCase {
+    return this.dependencies.createFieldUseCase;
+  }
+
+  getListFieldsUseCase(): ListFieldsUseCase {
+    return this.dependencies.listFieldsUseCase;
   }
 }
 
