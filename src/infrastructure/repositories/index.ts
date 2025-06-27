@@ -6,3 +6,6 @@ export * from './prisma-organization.repository';
 export * from './prisma-field.repository';
 export * from './prisma-crop.repository';
 export * from './prisma-task.repository';
+export * from './prisma-livestock.repository';
+export * from './prisma-inventory.repository';
+export * from './prisma-equipment.repository';

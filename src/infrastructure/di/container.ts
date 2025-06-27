@@ -5,7 +5,10 @@ import {
   OrganizationRepository,
   FieldRepository,
   CropRepository,
-  TaskRepository
+  TaskRepository,
+  LivestockRepository,
+  InventoryRepository,
+  EquipmentRepository
 } from '@/core/domain/repositories';
 import {
   GetCounterUseCase,
@@ -34,7 +37,10 @@ import {
   PrismaOrganizationRepository,
   PrismaFieldRepository,
   PrismaCropRepository,
-  PrismaTaskRepository
+  PrismaTaskRepository,
+  PrismaLivestockRepository,
+  PrismaInventoryRepository,
+  PrismaEquipmentRepository
 } from '@/infrastructure/repositories';
 import {prisma} from '@/infrastructure/prisma/client';
 
@@ -47,6 +53,9 @@ export interface Dependencies {
   fieldRepository: FieldRepository;
   cropRepository: CropRepository;
   taskRepository: TaskRepository;
+  livestockRepository: LivestockRepository;
+  inventoryRepository: InventoryRepository;
+  equipmentRepository: EquipmentRepository;
 
   // Use Cases
   getCounterUseCase: GetCounterUseCase;
@@ -81,6 +90,9 @@ class DIContainer {
     const fieldRepository = new PrismaFieldRepository(prisma);
     const cropRepository = new PrismaCropRepository(prisma);
     const taskRepository = new PrismaTaskRepository(prisma);
+    const livestockRepository = new PrismaLivestockRepository(prisma);
+    const inventoryRepository = new PrismaInventoryRepository(prisma);
+    const equipmentRepository = new PrismaEquipmentRepository(prisma);
 
     // Application layer - Use Cases
     const getCounterUseCase = new GetCounterUseCase(counterRepository);
@@ -142,6 +154,9 @@ class DIContainer {
       fieldRepository,
       cropRepository,
       taskRepository,
+      livestockRepository,
+      inventoryRepository,
+      equipmentRepository,
 
       // Use Cases
       getCounterUseCase,
