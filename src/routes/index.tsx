@@ -1,10 +1,10 @@
 // src/routes/index.tsx
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { getCounter, incrementCounter } from "@/presentation/controllers";
+import {createFileRoute, useRouter} from '@tanstack/react-router';
+import {getCounter, incrementCounter} from '@/presentation/controllers';
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   component: Home,
-  loader: async () => await getCounter(),
+  loader: async () => await getCounter()
 });
 
 function Home() {
@@ -17,9 +17,9 @@ function Home() {
       <div className="text-2xl">Current count: {state}</div>
       <button
         type="button"
-        className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         onClick={() => {
-          incrementCounter({ data: 1 }).then(() => {
+          incrementCounter({data: 1}).then(() => {
             router.invalidate();
           });
         }}

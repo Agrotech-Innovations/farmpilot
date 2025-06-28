@@ -41,15 +41,15 @@ export function CropPlanningCalendar({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planned':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-chart-2/20 text-chart-2';
       case 'planted':
-        return 'bg-green-100 text-green-800';
+        return 'bg-chart-1/20 text-chart-1';
       case 'growing':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-chart-4/20 text-chart-4';
       case 'harvested':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -97,7 +97,7 @@ export function CropPlanningCalendar({
             Plan and track your crop rotations and planting schedules
           </p>
         </div>
-        <Button className="bg-green-600 hover:bg-green-700">
+        <Button className="bg-chart-1 hover:bg-chart-1/90 text-background">
           <Sprout className="w-4 h-4 mr-2" />
           Plan New Crop
         </Button>
@@ -118,16 +118,16 @@ export function CropPlanningCalendar({
               {getCurrentSeasonCrops().map((crop) => (
                 <div
                   key={crop.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
                   onClick={() => onUpdateCropPlan(crop)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-chart-1"></div>
                     <div>
                       <h4 className="font-medium">
                         {crop.cropName} - {crop.variety}
                       </h4>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           {crop.fieldName}
@@ -140,7 +140,7 @@ export function CropPlanningCalendar({
                     <Badge className={getStatusColor(crop.status)}>
                       {crop.status}
                     </Badge>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-muted-foreground mt-1">
                       Plant: {formatDate(crop.plantingDate)}
                     </div>
                   </div>
@@ -161,16 +161,16 @@ export function CropPlanningCalendar({
           <CardContent>
             <div className="space-y-3">
               {getUpcomingPlantings().map((crop) => (
-                <div key={crop.id} className="p-3 bg-blue-50 rounded-lg">
-                  <h4 className="font-medium text-blue-900">{crop.cropName}</h4>
-                  <p className="text-sm text-blue-700">{crop.fieldName}</p>
-                  <p className="text-xs text-blue-600 mt-1">
+                <div key={crop.id} className="p-3 bg-chart-2/10 rounded-lg">
+                  <h4 className="font-medium text-chart-2">{crop.cropName}</h4>
+                  <p className="text-sm text-chart-2/80">{crop.fieldName}</p>
+                  <p className="text-xs text-chart-2/60 mt-1">
                     Due: {formatDate(crop.plantingDate)}
                   </p>
                 </div>
               ))}
               {getUpcomingPlantings().length === 0 && (
-                <p className="text-gray-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   No upcoming plantings scheduled
                 </p>
               )}
@@ -199,10 +199,10 @@ export function CropPlanningCalendar({
               return (
                 <div
                   key={field.id}
-                  className="p-4 border-2 border-dashed border-card-foreground rounded-lg hover:border-chart-2 transition-colors cursor-pointer"
+                  className="p-4 border-2 border-dashed border-border rounded-lg hover:border-chart-2 transition-colors cursor-pointer"
                   onClick={() => onCreateCropPlan(field.id, new Date())}
                 >
-                  <h3 className="font-semibold text-secondary-foreground">
+                  <h3 className="font-semibold text-foreground">
                     {field.name}
                   </h3>
                   <p className="text-sm text-muted-foreground">

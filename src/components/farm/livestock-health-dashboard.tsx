@@ -55,15 +55,15 @@ export function LivestockHealthDashboard({
   const getHealthStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'bg-green-100 text-green-800';
+        return 'bg-chart-1/20 text-chart-1';
       case 'sick':
-        return 'bg-red-100 text-red-800';
+        return 'bg-destructive/20 text-destructive';
       case 'injured':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-chart-4/20 text-chart-4';
       case 'deceased':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -119,7 +119,7 @@ export function LivestockHealthDashboard({
             Monitor animal health and schedule treatments
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-chart-2 hover:bg-chart-2/90 text-background">
           <Syringe className="w-4 h-4 mr-2" />
           Schedule Treatment
         </Button>
@@ -130,7 +130,7 @@ export function LivestockHealthDashboard({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Animals</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-4 w-4 text-chart-2" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -141,10 +141,10 @@ export function LivestockHealthDashboard({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Healthy</CardTitle>
-            <Heart className="h-4 w-4 text-green-600" />
+            <Heart className="h-4 w-4 text-chart-1" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-chart-1">
               {stats.healthy}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -158,10 +158,10 @@ export function LivestockHealthDashboard({
             <CardTitle className="text-sm font-medium">
               Need Attention
             </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertTriangle className="h-4 w-4 text-chart-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-chart-4">
               {stats.sick + stats.injured}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -175,10 +175,10 @@ export function LivestockHealthDashboard({
             <CardTitle className="text-sm font-medium">
               Vaccinations Due
             </CardTitle>
-            <Shield className="h-4 w-4 text-purple-600" />
+            <Shield className="h-4 w-4 text-chart-5" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-2xl font-bold text-chart-5">
               {getUpcomingVaccinations().length}
             </div>
             <p className="text-xs text-muted-foreground">Next 7 days</p>
@@ -254,7 +254,7 @@ export function LivestockHealthDashboard({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-purple-600" />
+                  <Calendar className="w-5 h-5 text-chart-5" />
                   Upcoming Vaccinations
                 </CardTitle>
               </CardHeader>
@@ -263,18 +263,18 @@ export function LivestockHealthDashboard({
                   {getUpcomingVaccinations().map((animal) => (
                     <div
                       key={animal.id}
-                      className="flex items-center justify-between p-3 bg-purple-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-chart-5/10 rounded-lg"
                     >
                       <div>
                         <h4 className="font-medium">
                           {animal.name || `Tag #${animal.tagNumber}`}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           {animal.species}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-purple-700">
+                        <p className="text-sm font-medium text-chart-5">
                           {animal.nextVaccination &&
                             formatDate(animal.nextVaccination)}
                         </p>
@@ -285,7 +285,7 @@ export function LivestockHealthDashboard({
                     </div>
                   ))}
                   {getUpcomingVaccinations().length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="text-muted-foreground text-center py-4">
                       No vaccinations due this week
                     </p>
                   )}
@@ -298,7 +298,7 @@ export function LivestockHealthDashboard({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-blue-600" />
+                <Activity className="w-5 h-5 text-chart-2" />
                 Recent Health Records
               </CardTitle>
             </CardHeader>
@@ -316,11 +316,11 @@ export function LivestockHealthDashboard({
                           {animal?.name || `Tag #${animal?.tagNumber}`} -{' '}
                           {record.recordType}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           {record.description}
                         </p>
                       </div>
-                      <div className="text-right text-sm text-gray-500">
+                      <div className="text-right text-sm text-muted-foreground">
                         {formatDate(record.date)}
                         {record.veterinarian && (
                           <p className="text-xs">Dr. {record.veterinarian}</p>
@@ -356,18 +356,18 @@ export function LivestockHealthDashboard({
                         {animal.healthStatus}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {animal.species} • {animal.breed}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {animal.age} years old
                     </p>
                     {animal.weight && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {animal.weight} lbs
                       </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       Last checkup: {formatDate(animal.lastCheckup)}
                     </p>
                   </div>
@@ -396,11 +396,11 @@ export function LivestockHealthDashboard({
                             <h4 className="font-medium">
                               {animal?.name || `Tag #${animal?.tagNumber}`}
                             </h4>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-muted-foreground">
                               {record.description}
                             </p>
                             {record.veterinarian && (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-muted-foreground">
                                 Dr. {record.veterinarian}
                               </p>
                             )}
@@ -410,7 +410,7 @@ export function LivestockHealthDashboard({
                               {formatDate(record.date)}
                             </p>
                             {record.cost && (
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-muted-foreground">
                                 ${record.cost}
                               </p>
                             )}
@@ -437,17 +437,17 @@ export function LivestockHealthDashboard({
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span>Health Rate</span>
-                    <span className="font-bold text-green-600">
+                    <span className="font-bold text-chart-1">
                       {((stats.healthy / stats.total) * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-green-600 h-2 rounded-full"
+                      className="bg-chart-1 h-2 rounded-full"
                       style={{width: `${(stats.healthy / stats.total) * 100}%`}}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {stats.healthy} out of {stats.total} animals are healthy
                   </p>
                 </div>
