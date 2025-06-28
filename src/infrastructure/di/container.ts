@@ -27,6 +27,7 @@ import {
   CreateFieldUseCase,
   ListFieldsUseCase,
   CreateTaskUseCase,
+  GetTaskUseCase,
   ListTasksUseCase,
   UpdateTaskStatusUseCase,
   CreateLivestockGroupUseCase,
@@ -97,6 +98,7 @@ export interface Dependencies {
   createFieldUseCase: CreateFieldUseCase;
   listFieldsUseCase: ListFieldsUseCase;
   createTaskUseCase: CreateTaskUseCase;
+  getTaskUseCase: GetTaskUseCase;
   listTasksUseCase: ListTasksUseCase;
   updateTaskStatusUseCase: UpdateTaskStatusUseCase;
   createLivestockGroupUseCase: CreateLivestockGroupUseCase;
@@ -184,6 +186,7 @@ class DIContainer {
       taskRepository,
       farmRepository
     );
+    const getTaskUseCase = new GetTaskUseCase(taskRepository);
     const listTasksUseCase = new ListTasksUseCase(
       taskRepository,
       farmRepository
@@ -278,6 +281,7 @@ class DIContainer {
       createFieldUseCase,
       listFieldsUseCase,
       createTaskUseCase,
+      getTaskUseCase,
       listTasksUseCase,
       updateTaskStatusUseCase,
       createLivestockGroupUseCase,
@@ -400,6 +404,10 @@ class DIContainer {
   // Task Use Cases
   getCreateTaskUseCase(): CreateTaskUseCase {
     return this.dependencies.createTaskUseCase;
+  }
+
+  getGetTaskUseCase(): GetTaskUseCase {
+    return this.dependencies.getTaskUseCase;
   }
 
   getListTasksUseCase(): ListTasksUseCase {
