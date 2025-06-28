@@ -41,7 +41,13 @@ import {
   GetInventoryAnalyticsUseCase,
   GetInventoryTransactionsUseCase,
   CreateEquipmentUseCase,
-  ScheduleMaintenanceUseCase
+  ScheduleMaintenanceUseCase,
+  ListEquipmentUseCase,
+  GetEquipmentUseCase,
+  UpdateEquipmentUseCase,
+  DeleteEquipmentUseCase,
+  GetMaintenanceRecordsUseCase,
+  GetEquipmentAnalyticsUseCase
 } from '@/core/application/use-cases';
 import {
   PrismaCounterRepository,
@@ -106,6 +112,12 @@ export interface Dependencies {
   getInventoryTransactionsUseCase: GetInventoryTransactionsUseCase;
   createEquipmentUseCase: CreateEquipmentUseCase;
   scheduleMaintenanceUseCase: ScheduleMaintenanceUseCase;
+  listEquipmentUseCase: ListEquipmentUseCase;
+  getEquipmentUseCase: GetEquipmentUseCase;
+  updateEquipmentUseCase: UpdateEquipmentUseCase;
+  deleteEquipmentUseCase: DeleteEquipmentUseCase;
+  getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase;
+  getEquipmentAnalyticsUseCase: GetEquipmentAnalyticsUseCase;
 }
 
 class DIContainer {
@@ -218,6 +230,20 @@ class DIContainer {
     const scheduleMaintenanceUseCase = new ScheduleMaintenanceUseCase(
       equipmentRepository
     );
+    const listEquipmentUseCase = new ListEquipmentUseCase(equipmentRepository);
+    const getEquipmentUseCase = new GetEquipmentUseCase(equipmentRepository);
+    const updateEquipmentUseCase = new UpdateEquipmentUseCase(
+      equipmentRepository
+    );
+    const deleteEquipmentUseCase = new DeleteEquipmentUseCase(
+      equipmentRepository
+    );
+    const getMaintenanceRecordsUseCase = new GetMaintenanceRecordsUseCase(
+      equipmentRepository
+    );
+    const getEquipmentAnalyticsUseCase = new GetEquipmentAnalyticsUseCase(
+      equipmentRepository
+    );
 
     this.dependencies = {
       // Repositories
@@ -266,7 +292,13 @@ class DIContainer {
       getInventoryAnalyticsUseCase,
       getInventoryTransactionsUseCase,
       createEquipmentUseCase,
-      scheduleMaintenanceUseCase
+      scheduleMaintenanceUseCase,
+      listEquipmentUseCase,
+      getEquipmentUseCase,
+      updateEquipmentUseCase,
+      deleteEquipmentUseCase,
+      getMaintenanceRecordsUseCase,
+      getEquipmentAnalyticsUseCase
     };
   }
 
@@ -339,6 +371,30 @@ class DIContainer {
 
   getScheduleMaintenanceUseCase(): ScheduleMaintenanceUseCase {
     return this.dependencies.scheduleMaintenanceUseCase;
+  }
+
+  getListEquipmentUseCase(): ListEquipmentUseCase {
+    return this.dependencies.listEquipmentUseCase;
+  }
+
+  getGetEquipmentUseCase(): GetEquipmentUseCase {
+    return this.dependencies.getEquipmentUseCase;
+  }
+
+  getUpdateEquipmentUseCase(): UpdateEquipmentUseCase {
+    return this.dependencies.updateEquipmentUseCase;
+  }
+
+  getDeleteEquipmentUseCase(): DeleteEquipmentUseCase {
+    return this.dependencies.deleteEquipmentUseCase;
+  }
+
+  getGetMaintenanceRecordsUseCase(): GetMaintenanceRecordsUseCase {
+    return this.dependencies.getMaintenanceRecordsUseCase;
+  }
+
+  getGetEquipmentAnalyticsUseCase(): GetEquipmentAnalyticsUseCase {
+    return this.dependencies.getEquipmentAnalyticsUseCase;
   }
 
   // Task Use Cases
