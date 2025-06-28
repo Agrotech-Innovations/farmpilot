@@ -32,6 +32,14 @@ import {
   UpdateTaskStatusUseCase,
   CreateLivestockGroupUseCase,
   AddLivestockAnimalUseCase,
+  CreateHealthRecordUseCase,
+  GetHealthRecordsUseCase,
+  UpdateAnimalHealthStatusUseCase,
+  ScheduleVaccinationUseCase,
+  GetLivestockHealthAnalyticsUseCase,
+  RecordTreatmentUseCase,
+  GetAnimalHealthHistoryUseCase,
+  UpdateAnimalWeightUseCase,
   CreateInventoryItemUseCase,
   RecordInventoryTransactionUseCase,
   GetInventoryItemUseCase,
@@ -103,6 +111,14 @@ export interface Dependencies {
   updateTaskStatusUseCase: UpdateTaskStatusUseCase;
   createLivestockGroupUseCase: CreateLivestockGroupUseCase;
   addLivestockAnimalUseCase: AddLivestockAnimalUseCase;
+  createHealthRecordUseCase: CreateHealthRecordUseCase;
+  getHealthRecordsUseCase: GetHealthRecordsUseCase;
+  updateAnimalHealthStatusUseCase: UpdateAnimalHealthStatusUseCase;
+  scheduleVaccinationUseCase: ScheduleVaccinationUseCase;
+  getLivestockHealthAnalyticsUseCase: GetLivestockHealthAnalyticsUseCase;
+  recordTreatmentUseCase: RecordTreatmentUseCase;
+  getAnimalHealthHistoryUseCase: GetAnimalHealthHistoryUseCase;
+  updateAnimalWeightUseCase: UpdateAnimalWeightUseCase;
   createInventoryItemUseCase: CreateInventoryItemUseCase;
   recordInventoryTransactionUseCase: RecordInventoryTransactionUseCase;
   getInventoryItemUseCase: GetInventoryItemUseCase;
@@ -199,6 +215,29 @@ class DIContainer {
     const addLivestockAnimalUseCase = new AddLivestockAnimalUseCase(
       livestockRepository
     );
+    const createHealthRecordUseCase = new CreateHealthRecordUseCase(
+      livestockRepository
+    );
+    const getHealthRecordsUseCase = new GetHealthRecordsUseCase(
+      livestockRepository
+    );
+    const updateAnimalHealthStatusUseCase = new UpdateAnimalHealthStatusUseCase(
+      livestockRepository
+    );
+    const scheduleVaccinationUseCase = new ScheduleVaccinationUseCase(
+      livestockRepository
+    );
+    const getLivestockHealthAnalyticsUseCase =
+      new GetLivestockHealthAnalyticsUseCase(livestockRepository);
+    const recordTreatmentUseCase = new RecordTreatmentUseCase(
+      livestockRepository
+    );
+    const getAnimalHealthHistoryUseCase = new GetAnimalHealthHistoryUseCase(
+      livestockRepository
+    );
+    const updateAnimalWeightUseCase = new UpdateAnimalWeightUseCase(
+      livestockRepository
+    );
 
     const createInventoryItemUseCase = new CreateInventoryItemUseCase(
       inventoryRepository
@@ -286,6 +325,14 @@ class DIContainer {
       updateTaskStatusUseCase,
       createLivestockGroupUseCase,
       addLivestockAnimalUseCase,
+      createHealthRecordUseCase,
+      getHealthRecordsUseCase,
+      updateAnimalHealthStatusUseCase,
+      scheduleVaccinationUseCase,
+      getLivestockHealthAnalyticsUseCase,
+      recordTreatmentUseCase,
+      getAnimalHealthHistoryUseCase,
+      updateAnimalWeightUseCase,
       createInventoryItemUseCase,
       recordInventoryTransactionUseCase,
       getInventoryItemUseCase,

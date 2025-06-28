@@ -2,7 +2,12 @@ import {createServerFn} from '@tanstack/react-start';
 import {container} from '@/infrastructure/di/container';
 import {
   CreateLivestockGroupUseCase,
-  AddLivestockAnimalUseCase
+  AddLivestockAnimalUseCase,
+  CreateHealthRecordUseCase,
+  GetHealthRecordsUseCase,
+  UpdateAnimalHealthStatusUseCase,
+  GetLivestockHealthAnalyticsUseCase,
+  UpdateAnimalWeightUseCase
 } from '@/core/application/use-cases/livestock';
 import {
   LivestockGroup,
@@ -247,19 +252,15 @@ export const updateAnimalHealth = createServerFn({
 }).handler(async (data: unknown) => {
   try {
     const validatedData = updateAnimalHealthSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
+    const updateAnimalHealthStatusUseCase =
+      container.get<UpdateAnimalHealthStatusUseCase>(
+        'updateAnimalHealthStatusUseCase'
+      );
 
-    const animal = await livestockRepository.findAnimalById(
-      validatedData.animalId
-    );
-    if (!animal) {
-      throw new Error('Animal not found');
-    }
-
-    const updatedAnimal = animal.updateHealthStatus(validatedData.healthStatus);
-    await livestockRepository.saveAnimal(updatedAnimal);
+    const updatedAnimal = await updateAnimalHealthStatusUseCase.execute({
+      animalId: validatedData.animalId,
+      healthStatus: validatedData.healthStatus
+    });
 
     return {
       success: true,
@@ -297,38 +298,34 @@ export const updateAnimalWeight = createServerFn({
 }).handler(async (data: unknown) => {
   try {
     const validatedData = updateAnimalWeightSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
+    const updateAnimalWeightUseCase = container.get<UpdateAnimalWeightUseCase>(
+      'updateAnimalWeightUseCase'
     );
 
-    const animal = await livestockRepository.findAnimalById(
-      validatedData.animalId
-    );
-    if (!animal) {
-      throw new Error('Animal not found');
-    }
-
-    const updatedAnimal = animal.updateWeight(validatedData.weight);
-    await livestockRepository.saveAnimal(updatedAnimal);
+    const result = await updateAnimalWeightUseCase.execute({
+      animalId: validatedData.animalId,
+      weight: validatedData.weight,
+      createHealthRecord: true
+    });
 
     return {
       success: true,
       data: {
-        id: updatedAnimal.id,
-        groupId: updatedAnimal.groupId,
-        tagNumber: updatedAnimal.tagNumber,
-        name: updatedAnimal.name,
-        sex: updatedAnimal.sex,
-        birthDate: updatedAnimal.birthDate,
-        breed: updatedAnimal.breed,
-        motherTagNumber: updatedAnimal.motherTagNumber,
-        fatherTagNumber: updatedAnimal.fatherTagNumber,
-        currentWeight: updatedAnimal.currentWeight,
-        healthStatus: updatedAnimal.healthStatus,
-        age: updatedAnimal.getAge(),
-        isHealthy: updatedAnimal.isHealthy(),
-        createdAt: updatedAnimal.createdAt,
-        updatedAt: updatedAnimal.updatedAt
+        id: result.updatedAnimal.id,
+        groupId: result.updatedAnimal.groupId,
+        tagNumber: result.updatedAnimal.tagNumber,
+        name: result.updatedAnimal.name,
+        sex: result.updatedAnimal.sex,
+        birthDate: result.updatedAnimal.birthDate,
+        breed: result.updatedAnimal.breed,
+        motherTagNumber: result.updatedAnimal.motherTagNumber,
+        fatherTagNumber: result.updatedAnimal.fatherTagNumber,
+        currentWeight: result.updatedAnimal.currentWeight,
+        healthStatus: result.updatedAnimal.healthStatus,
+        age: result.updatedAnimal.getAge(),
+        isHealthy: result.updatedAnimal.isHealthy(),
+        createdAt: result.updatedAnimal.createdAt,
+        updatedAt: result.updatedAnimal.updatedAt
       }
     };
   } catch (error) {
@@ -347,20 +344,11 @@ export const createHealthRecord = createServerFn({
 }).handler(async (data: unknown) => {
   try {
     const validatedData = createHealthRecordSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
+    const createHealthRecordUseCase = container.get<CreateHealthRecordUseCase>(
+      'createHealthRecordUseCase'
     );
 
-    // Verify animal exists
-    const animal = await livestockRepository.findAnimalById(
-      validatedData.animalId
-    );
-    if (!animal) {
-      throw new Error('Animal not found');
-    }
-
-    const healthRecord = new HealthRecord({
-      id: crypto.randomUUID(),
+    const healthRecord = await createHealthRecordUseCase.execute({
       animalId: validatedData.animalId,
       recordType: validatedData.recordType,
       description: validatedData.description,
@@ -369,12 +357,8 @@ export const createHealthRecord = createServerFn({
       dosage: validatedData.dosage,
       veterinarian: validatedData.veterinarian,
       cost: validatedData.cost,
-      notes: validatedData.notes,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      notes: validatedData.notes
     });
-
-    await livestockRepository.saveHealthRecord(healthRecord);
 
     return {
       success: true,
@@ -409,18 +393,18 @@ export const getHealthRecords = createServerFn({
 }).handler(async (data: unknown) => {
   try {
     const validatedData = getHealthRecordsSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
+    const getHealthRecordsUseCase = container.get<GetHealthRecordsUseCase>(
+      'getHealthRecordsUseCase'
     );
 
-    const records = await livestockRepository.findHealthRecordsByAnimal(
-      validatedData.animalId
-    );
+    const result = await getHealthRecordsUseCase.execute({
+      animalId: validatedData.animalId
+    });
 
     return {
       success: true,
       data: {
-        records: records.map((record: HealthRecord) => ({
+        records: result.records.map((record: HealthRecord) => ({
           id: record.id,
           animalId: record.animalId,
           recordType: record.recordType,
@@ -450,40 +434,19 @@ export const getLivestockAnalytics = createServerFn({
 }).handler(async (data: unknown) => {
   try {
     const validatedData = getAnalyticsSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
+    const getLivestockHealthAnalyticsUseCase =
+      container.get<GetLivestockHealthAnalyticsUseCase>(
+        'getLivestockHealthAnalyticsUseCase'
+      );
 
-    const [totalAnimals, unhealthyAnimals, upcomingVaccinations] =
-      await Promise.all([
-        livestockRepository.countAnimalsByFarm(validatedData.farmId),
-        livestockRepository.findUnhealthyAnimals(validatedData.farmId),
-        livestockRepository.findUpcomingVaccinations(validatedData.farmId, 30)
-      ]);
+    const analytics = await getLivestockHealthAnalyticsUseCase.execute({
+      farmId: validatedData.farmId,
+      daysAhead: 30
+    });
 
     return {
       success: true,
-      data: {
-        totalAnimals,
-        unhealthyCount: unhealthyAnimals.length,
-        upcomingVaccinationsCount: upcomingVaccinations.length,
-        unhealthyAnimals: unhealthyAnimals.map((animal: LivestockAnimal) => ({
-          id: animal.id,
-          tagNumber: animal.tagNumber,
-          name: animal.name,
-          healthStatus: animal.healthStatus,
-          groupId: animal.groupId
-        })),
-        upcomingVaccinations: upcomingVaccinations.map(
-          (record: HealthRecord) => ({
-            id: record.id,
-            animalId: record.animalId,
-            recordType: record.recordType,
-            description: record.description,
-            createdAt: record.createdAt
-          })
-        )
-      }
+      data: analytics
     };
   } catch (error) {
     return {
@@ -566,6 +529,203 @@ export const deleteLivestockAnimal = createServerFn({
         error instanceof Error
           ? error.message
           : 'Failed to delete livestock animal'
+    };
+  }
+});
+
+export const scheduleVaccination = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        animalId: z.string().min(1),
+        vaccinationType: z.string().min(1),
+        description: z.string().min(1),
+        scheduledDate: z
+          .string()
+          .optional()
+          .transform((val) => (val ? new Date(val) : undefined)),
+        veterinarian: z.string().optional(),
+        cost: z.number().min(0).optional(),
+        notes: z.string().optional()
+      })
+      .parse(data);
+
+    const scheduleVaccinationUseCase = container.get<
+      import('@/core/application/use-cases/livestock').ScheduleVaccinationUseCase
+    >('scheduleVaccinationUseCase');
+
+    const vaccinationRecord = await scheduleVaccinationUseCase.execute({
+      animalId: validatedData.animalId,
+      vaccinationType: validatedData.vaccinationType,
+      description: validatedData.description,
+      scheduledDate: validatedData.scheduledDate,
+      veterinarian: validatedData.veterinarian,
+      cost: validatedData.cost,
+      notes: validatedData.notes
+    });
+
+    return {
+      success: true,
+      data: {
+        id: vaccinationRecord.id,
+        animalId: vaccinationRecord.animalId,
+        recordType: vaccinationRecord.recordType,
+        description: vaccinationRecord.description,
+        veterinarian: vaccinationRecord.veterinarian,
+        cost: vaccinationRecord.cost,
+        notes: vaccinationRecord.notes,
+        createdAt: vaccinationRecord.createdAt,
+        updatedAt: vaccinationRecord.updatedAt
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to schedule vaccination'
+    };
+  }
+});
+
+export const recordTreatment = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        animalId: z.string().min(1),
+        description: z.string().min(1),
+        treatment: z.string().min(1),
+        medication: z.string().optional(),
+        dosage: z.string().optional(),
+        veterinarian: z.string().optional(),
+        cost: z.number().min(0).optional(),
+        notes: z.string().optional(),
+        updateHealthStatus: z.boolean().optional(),
+        newHealthStatus: z
+          .enum(['healthy', 'sick', 'injured', 'deceased'])
+          .optional()
+      })
+      .parse(data);
+
+    const recordTreatmentUseCase = container.get<
+      import('@/core/application/use-cases/livestock').RecordTreatmentUseCase
+    >('recordTreatmentUseCase');
+
+    const result = await recordTreatmentUseCase.execute({
+      animalId: validatedData.animalId,
+      description: validatedData.description,
+      treatment: validatedData.treatment,
+      medication: validatedData.medication,
+      dosage: validatedData.dosage,
+      veterinarian: validatedData.veterinarian,
+      cost: validatedData.cost,
+      notes: validatedData.notes,
+      updateHealthStatus: validatedData.updateHealthStatus,
+      newHealthStatus: validatedData.newHealthStatus
+    });
+
+    return {
+      success: true,
+      data: {
+        healthRecord: {
+          id: result.healthRecord.id,
+          animalId: result.healthRecord.animalId,
+          recordType: result.healthRecord.recordType,
+          description: result.healthRecord.description,
+          treatment: result.healthRecord.treatment,
+          medication: result.healthRecord.medication,
+          dosage: result.healthRecord.dosage,
+          veterinarian: result.healthRecord.veterinarian,
+          cost: result.healthRecord.cost,
+          notes: result.healthRecord.notes,
+          createdAt: result.healthRecord.createdAt,
+          updatedAt: result.healthRecord.updatedAt
+        },
+        updatedAnimal: result.updatedAnimal
+          ? {
+              id: result.updatedAnimal.id,
+              tagNumber: result.updatedAnimal.tagNumber,
+              name: result.updatedAnimal.name,
+              healthStatus: result.updatedAnimal.healthStatus,
+              groupId: result.updatedAnimal.groupId
+            }
+          : undefined
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to record treatment'
+    };
+  }
+});
+
+export const getAnimalHealthHistory = createServerFn({
+  method: 'GET'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        animalId: z.string().min(1),
+        recordType: z
+          .enum(['vaccination', 'treatment', 'checkup', 'injury', 'illness'])
+          .optional(),
+        startDate: z
+          .string()
+          .optional()
+          .transform((val) => (val ? new Date(val) : undefined)),
+        endDate: z
+          .string()
+          .optional()
+          .transform((val) => (val ? new Date(val) : undefined))
+      })
+      .parse(data);
+
+    const getAnimalHealthHistoryUseCase = container.get<
+      import('@/core/application/use-cases/livestock').GetAnimalHealthHistoryUseCase
+    >('getAnimalHealthHistoryUseCase');
+
+    const history = await getAnimalHealthHistoryUseCase.execute({
+      animalId: validatedData.animalId,
+      recordType: validatedData.recordType,
+      startDate: validatedData.startDate,
+      endDate: validatedData.endDate
+    });
+
+    return {
+      success: true,
+      data: {
+        animal: history.animal,
+        healthRecords: history.healthRecords.map((record) => ({
+          id: record.id,
+          animalId: record.animalId,
+          recordType: record.recordType,
+          description: record.description,
+          treatment: record.treatment,
+          medication: record.medication,
+          dosage: record.dosage,
+          veterinarian: record.veterinarian,
+          cost: record.cost,
+          notes: record.notes,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt
+        })),
+        summary: history.summary
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get animal health history'
     };
   }
 });
