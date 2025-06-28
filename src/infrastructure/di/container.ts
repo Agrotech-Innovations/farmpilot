@@ -40,6 +40,11 @@ import {
   RecordTreatmentUseCase,
   GetAnimalHealthHistoryUseCase,
   UpdateAnimalWeightUseCase,
+  CreateBreedingRecordUseCase,
+  UpdatePregnancyStatusUseCase,
+  GetBreedingRecordsUseCase,
+  GetBreedingAnalyticsUseCase,
+  DeleteBreedingRecordUseCase,
   CreateInventoryItemUseCase,
   RecordInventoryTransactionUseCase,
   GetInventoryItemUseCase,
@@ -119,6 +124,11 @@ export interface Dependencies {
   recordTreatmentUseCase: RecordTreatmentUseCase;
   getAnimalHealthHistoryUseCase: GetAnimalHealthHistoryUseCase;
   updateAnimalWeightUseCase: UpdateAnimalWeightUseCase;
+  createBreedingRecordUseCase: CreateBreedingRecordUseCase;
+  updatePregnancyStatusUseCase: UpdatePregnancyStatusUseCase;
+  getBreedingRecordsUseCase: GetBreedingRecordsUseCase;
+  getBreedingAnalyticsUseCase: GetBreedingAnalyticsUseCase;
+  deleteBreedingRecordUseCase: DeleteBreedingRecordUseCase;
   createInventoryItemUseCase: CreateInventoryItemUseCase;
   recordInventoryTransactionUseCase: RecordInventoryTransactionUseCase;
   getInventoryItemUseCase: GetInventoryItemUseCase;
@@ -239,6 +249,22 @@ class DIContainer {
       livestockRepository
     );
 
+    const createBreedingRecordUseCase = new CreateBreedingRecordUseCase(
+      livestockRepository
+    );
+    const updatePregnancyStatusUseCase = new UpdatePregnancyStatusUseCase(
+      livestockRepository
+    );
+    const getBreedingRecordsUseCase = new GetBreedingRecordsUseCase(
+      livestockRepository
+    );
+    const getBreedingAnalyticsUseCase = new GetBreedingAnalyticsUseCase(
+      livestockRepository
+    );
+    const deleteBreedingRecordUseCase = new DeleteBreedingRecordUseCase(
+      livestockRepository
+    );
+
     const createInventoryItemUseCase = new CreateInventoryItemUseCase(
       inventoryRepository
     );
@@ -333,6 +359,11 @@ class DIContainer {
       recordTreatmentUseCase,
       getAnimalHealthHistoryUseCase,
       updateAnimalWeightUseCase,
+      createBreedingRecordUseCase,
+      updatePregnancyStatusUseCase,
+      getBreedingRecordsUseCase,
+      getBreedingAnalyticsUseCase,
+      deleteBreedingRecordUseCase,
       createInventoryItemUseCase,
       recordInventoryTransactionUseCase,
       getInventoryItemUseCase,

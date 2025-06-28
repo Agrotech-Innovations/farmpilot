@@ -1,4 +1,9 @@
-import {LivestockGroup, LivestockAnimal, HealthRecord} from '../entities';
+import {
+  LivestockGroup,
+  LivestockAnimal,
+  HealthRecord,
+  BreedingRecord
+} from '../entities';
 
 export interface LivestockRepository {
   // Livestock Groups
@@ -22,6 +27,21 @@ export interface LivestockRepository {
   findHealthRecordById(id: string): Promise<HealthRecord | null>;
   saveHealthRecord(record: HealthRecord): Promise<void>;
   deleteHealthRecord(id: string): Promise<void>;
+
+  // Breeding Records
+  findBreedingRecordsByMother(
+    motherAnimalId: string
+  ): Promise<BreedingRecord[]>;
+  findBreedingRecordsByFarm(farmId: string): Promise<BreedingRecord[]>;
+  findBreedingRecordById(id: string): Promise<BreedingRecord | null>;
+  saveBreedingRecord(record: BreedingRecord): Promise<void>;
+  deleteBreedingRecord(id: string): Promise<void>;
+  findActivePregnancies(farmId: string): Promise<BreedingRecord[]>;
+  findOverduePregnancies(farmId: string): Promise<BreedingRecord[]>;
+  findUpcomingBirths(
+    farmId: string,
+    daysAhead?: number
+  ): Promise<BreedingRecord[]>;
 
   // Analytics
   countAnimalsByFarm(farmId: string): Promise<number>;

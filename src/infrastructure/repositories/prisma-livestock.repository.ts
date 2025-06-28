@@ -2,7 +2,8 @@ import {PrismaClient} from '@prisma/client';
 import {
   LivestockGroup,
   LivestockAnimal,
-  HealthRecord
+  HealthRecord,
+  BreedingRecord
 } from '@/core/domain/entities';
 import {LivestockRepository} from '@/core/domain/repositories';
 
@@ -183,6 +184,145 @@ export class PrismaLivestockRepository implements LivestockRepository {
     });
   }
 
+  // Breeding Records
+  async findBreedingRecordsByMother(
+    motherAnimalId: string
+  ): Promise<BreedingRecord[]> {
+    const records = await this.prisma.breedingRecord.findMany({
+      where: {motherAnimalId},
+      orderBy: {breedingDate: 'desc'}
+    });
+
+    return records.map((record) => this.breedingRecordToDomain(record));
+  }
+
+  async findBreedingRecordsByFarm(farmId: string): Promise<BreedingRecord[]> {
+    const records = await this.prisma.breedingRecord.findMany({
+      where: {
+        mother: {
+          group: {
+            farmId
+          }
+        }
+      },
+      orderBy: {breedingDate: 'desc'}
+    });
+
+    return records.map((record) => this.breedingRecordToDomain(record));
+  }
+
+  async findBreedingRecordById(id: string): Promise<BreedingRecord | null> {
+    const record = await this.prisma.breedingRecord.findUnique({
+      where: {id}
+    });
+
+    return record ? this.breedingRecordToDomain(record) : null;
+  }
+
+  async saveBreedingRecord(record: BreedingRecord): Promise<void> {
+    await this.prisma.breedingRecord.upsert({
+      where: {id: record.id},
+      create: {
+        id: record.id,
+        motherAnimalId: record.motherAnimalId,
+        fatherAnimalId: record.fatherAnimalId,
+        breedingDate: record.breedingDate,
+        expectedBirthDate: record.expectedBirthDate,
+        actualBirthDate: record.actualBirthDate,
+        pregnancyStatus: record.pregnancyStatus,
+        offspringCount: record.offspringCount,
+        notes: record.notes,
+        createdAt: record.createdAt,
+        updatedAt: record.updatedAt
+      },
+      update: {
+        fatherAnimalId: record.fatherAnimalId,
+        breedingDate: record.breedingDate,
+        expectedBirthDate: record.expectedBirthDate,
+        actualBirthDate: record.actualBirthDate,
+        pregnancyStatus: record.pregnancyStatus,
+        offspringCount: record.offspringCount,
+        notes: record.notes,
+        updatedAt: record.updatedAt
+      }
+    });
+  }
+
+  async deleteBreedingRecord(id: string): Promise<void> {
+    await this.prisma.breedingRecord.delete({
+      where: {id}
+    });
+  }
+
+  async findActivePregnancies(farmId: string): Promise<BreedingRecord[]> {
+    const records = await this.prisma.breedingRecord.findMany({
+      where: {
+        mother: {
+          group: {
+            farmId
+          }
+        },
+        pregnancyStatus: {
+          in: ['bred', 'confirmed']
+        }
+      },
+      orderBy: {breedingDate: 'desc'}
+    });
+
+    return records.map((record) => this.breedingRecordToDomain(record));
+  }
+
+  async findOverduePregnancies(farmId: string): Promise<BreedingRecord[]> {
+    const now = new Date();
+    const records = await this.prisma.breedingRecord.findMany({
+      where: {
+        mother: {
+          group: {
+            farmId
+          }
+        },
+        pregnancyStatus: {
+          in: ['bred', 'confirmed']
+        },
+        expectedBirthDate: {
+          lt: now
+        }
+      },
+      orderBy: {expectedBirthDate: 'asc'}
+    });
+
+    return records.map((record) => this.breedingRecordToDomain(record));
+  }
+
+  async findUpcomingBirths(
+    farmId: string,
+    daysAhead = 30
+  ): Promise<BreedingRecord[]> {
+    const now = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(now.getDate() + daysAhead);
+
+    const records = await this.prisma.breedingRecord.findMany({
+      where: {
+        mother: {
+          group: {
+            farmId
+          }
+        },
+        pregnancyStatus: {
+          in: ['bred', 'confirmed']
+        },
+        expectedBirthDate: {
+          gte: now,
+          lte: futureDate
+        }
+      },
+      orderBy: {expectedBirthDate: 'asc'}
+    });
+
+    return records.map((record) => this.breedingRecordToDomain(record));
+  }
+
   // Analytics
   async countAnimalsByFarm(farmId: string): Promise<number> {
     const result = await this.prisma.livestockAnimal.count({
@@ -340,6 +480,38 @@ export class PrismaLivestockRepository implements LivestockRepository {
       dosage: record.dosage || undefined,
       veterinarian: record.veterinarian || undefined,
       cost: record.cost || undefined,
+      notes: record.notes || undefined,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt
+    });
+  }
+
+  private breedingRecordToDomain(record: {
+    id: string;
+    motherAnimalId: string;
+    fatherAnimalId: string | null;
+    breedingDate: Date;
+    expectedBirthDate: Date | null;
+    actualBirthDate: Date | null;
+    pregnancyStatus: string;
+    offspringCount: number | null;
+    notes: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }): BreedingRecord {
+    return new BreedingRecord({
+      id: record.id,
+      motherAnimalId: record.motherAnimalId,
+      fatherAnimalId: record.fatherAnimalId || undefined,
+      breedingDate: record.breedingDate,
+      expectedBirthDate: record.expectedBirthDate || undefined,
+      actualBirthDate: record.actualBirthDate || undefined,
+      pregnancyStatus: record.pregnancyStatus as
+        | 'bred'
+        | 'confirmed'
+        | 'aborted'
+        | 'birthed',
+      offspringCount: record.offspringCount || undefined,
       notes: record.notes || undefined,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt

@@ -42,6 +42,20 @@ export interface HealthRecordProps {
   updatedAt?: Date;
 }
 
+export interface BreedingRecordProps {
+  id: string;
+  motherAnimalId: string;
+  fatherAnimalId?: string;
+  breedingDate: Date;
+  expectedBirthDate?: Date;
+  actualBirthDate?: Date;
+  pregnancyStatus: 'bred' | 'confirmed' | 'aborted' | 'birthed';
+  offspringCount?: number;
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export class LivestockGroup extends BaseEntity {
   public readonly farmId: string;
   public readonly name: string;
@@ -236,6 +250,131 @@ export class HealthRecord extends BaseEntity {
       dosage: this.dosage,
       veterinarian: this.veterinarian,
       cost: this.cost,
+      notes: this.notes,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
+    };
+  }
+}
+
+export class BreedingRecord extends BaseEntity {
+  public readonly motherAnimalId: string;
+  public readonly fatherAnimalId?: string;
+  public readonly breedingDate: Date;
+  public readonly expectedBirthDate?: Date;
+  public readonly actualBirthDate?: Date;
+  public readonly pregnancyStatus: 'bred' | 'confirmed' | 'aborted' | 'birthed';
+  public readonly offspringCount?: number;
+  public readonly notes?: string;
+
+  constructor(props: BreedingRecordProps) {
+    super(props.id, props.createdAt, props.updatedAt);
+
+    this.validateRequired(props.motherAnimalId, 'Mother animal ID');
+    this.validateRequired(props.breedingDate, 'Breeding date');
+    this.validateRequired(props.pregnancyStatus, 'Pregnancy status');
+
+    if (props.offspringCount !== undefined) {
+      this.validatePositiveNumber(props.offspringCount, 'Offspring count');
+    }
+
+    // Validate dates
+    if (props.expectedBirthDate && props.breedingDate) {
+      if (props.expectedBirthDate <= props.breedingDate) {
+        throw new Error('Expected birth date must be after breeding date');
+      }
+    }
+
+    if (props.actualBirthDate && props.breedingDate) {
+      if (props.actualBirthDate < props.breedingDate) {
+        throw new Error('Actual birth date cannot be before breeding date');
+      }
+    }
+
+    this.motherAnimalId = props.motherAnimalId;
+    this.fatherAnimalId = props.fatherAnimalId;
+    this.breedingDate = props.breedingDate;
+    this.expectedBirthDate = props.expectedBirthDate;
+    this.actualBirthDate = props.actualBirthDate;
+    this.pregnancyStatus = props.pregnancyStatus;
+    this.offspringCount = props.offspringCount;
+    this.notes = props.notes;
+  }
+
+  public updatePregnancyStatus(
+    status: 'bred' | 'confirmed' | 'aborted' | 'birthed',
+    actualBirthDate?: Date,
+    offspringCount?: number
+  ): BreedingRecord {
+    const props = this.toProps();
+
+    if (status === 'birthed') {
+      if (!actualBirthDate) {
+        throw new Error('Actual birth date is required when status is birthed');
+      }
+      if (offspringCount === undefined || offspringCount < 0) {
+        throw new Error(
+          'Valid offspring count is required when status is birthed'
+        );
+      }
+    }
+
+    return new BreedingRecord({
+      ...props,
+      pregnancyStatus: status,
+      actualBirthDate: actualBirthDate || props.actualBirthDate,
+      offspringCount:
+        offspringCount !== undefined ? offspringCount : props.offspringCount,
+      updatedAt: this.withUpdatedTimestamp()
+    });
+  }
+
+  public updateExpectedBirthDate(expectedBirthDate: Date): BreedingRecord {
+    if (expectedBirthDate <= this.breedingDate) {
+      throw new Error('Expected birth date must be after breeding date');
+    }
+
+    return new BreedingRecord({
+      ...this.toProps(),
+      expectedBirthDate,
+      updatedAt: this.withUpdatedTimestamp()
+    });
+  }
+
+  public getGestationDays(): number | null {
+    const endDate = this.actualBirthDate || new Date();
+    return Math.floor(
+      (endDate.getTime() - this.breedingDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+  }
+
+  public isPregnant(): boolean {
+    return (
+      this.pregnancyStatus === 'bred' || this.pregnancyStatus === 'confirmed'
+    );
+  }
+
+  public hasGivenBirth(): boolean {
+    return this.pregnancyStatus === 'birthed';
+  }
+
+  public isOverdue(): boolean {
+    if (!this.expectedBirthDate || this.hasGivenBirth()) {
+      return false;
+    }
+    return new Date() > this.expectedBirthDate;
+  }
+
+  private toProps(): BreedingRecordProps {
+    return {
+      id: this.id,
+      motherAnimalId: this.motherAnimalId,
+      fatherAnimalId: this.fatherAnimalId,
+      breedingDate: this.breedingDate,
+      expectedBirthDate: this.expectedBirthDate,
+      actualBirthDate: this.actualBirthDate,
+      pregnancyStatus: this.pregnancyStatus,
+      offspringCount: this.offspringCount,
       notes: this.notes,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
