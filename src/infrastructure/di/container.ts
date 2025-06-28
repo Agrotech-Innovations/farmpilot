@@ -33,6 +33,13 @@ import {
   AddLivestockAnimalUseCase,
   CreateInventoryItemUseCase,
   RecordInventoryTransactionUseCase,
+  GetInventoryItemUseCase,
+  ListInventoryItemsUseCase,
+  UpdateInventoryItemUseCase,
+  DeleteInventoryItemUseCase,
+  GetInventoryAlertsUseCase,
+  GetInventoryAnalyticsUseCase,
+  GetInventoryTransactionsUseCase,
   CreateEquipmentUseCase,
   ScheduleMaintenanceUseCase
 } from '@/core/application/use-cases';
@@ -90,6 +97,13 @@ export interface Dependencies {
   addLivestockAnimalUseCase: AddLivestockAnimalUseCase;
   createInventoryItemUseCase: CreateInventoryItemUseCase;
   recordInventoryTransactionUseCase: RecordInventoryTransactionUseCase;
+  getInventoryItemUseCase: GetInventoryItemUseCase;
+  listInventoryItemsUseCase: ListInventoryItemsUseCase;
+  updateInventoryItemUseCase: UpdateInventoryItemUseCase;
+  deleteInventoryItemUseCase: DeleteInventoryItemUseCase;
+  getInventoryAlertsUseCase: GetInventoryAlertsUseCase;
+  getInventoryAnalyticsUseCase: GetInventoryAnalyticsUseCase;
+  getInventoryTransactionsUseCase: GetInventoryTransactionsUseCase;
   createEquipmentUseCase: CreateEquipmentUseCase;
   scheduleMaintenanceUseCase: ScheduleMaintenanceUseCase;
 }
@@ -176,6 +190,27 @@ class DIContainer {
     );
     const recordInventoryTransactionUseCase =
       new RecordInventoryTransactionUseCase(inventoryRepository);
+    const getInventoryItemUseCase = new GetInventoryItemUseCase(
+      inventoryRepository
+    );
+    const listInventoryItemsUseCase = new ListInventoryItemsUseCase(
+      inventoryRepository
+    );
+    const updateInventoryItemUseCase = new UpdateInventoryItemUseCase(
+      inventoryRepository
+    );
+    const deleteInventoryItemUseCase = new DeleteInventoryItemUseCase(
+      inventoryRepository
+    );
+    const getInventoryAlertsUseCase = new GetInventoryAlertsUseCase(
+      inventoryRepository
+    );
+    const getInventoryAnalyticsUseCase = new GetInventoryAnalyticsUseCase(
+      inventoryRepository
+    );
+    const getInventoryTransactionsUseCase = new GetInventoryTransactionsUseCase(
+      inventoryRepository
+    );
 
     const createEquipmentUseCase = new CreateEquipmentUseCase(
       equipmentRepository
@@ -223,6 +258,13 @@ class DIContainer {
       addLivestockAnimalUseCase,
       createInventoryItemUseCase,
       recordInventoryTransactionUseCase,
+      getInventoryItemUseCase,
+      listInventoryItemsUseCase,
+      updateInventoryItemUseCase,
+      deleteInventoryItemUseCase,
+      getInventoryAlertsUseCase,
+      getInventoryAnalyticsUseCase,
+      getInventoryTransactionsUseCase,
       createEquipmentUseCase,
       scheduleMaintenanceUseCase
     };
@@ -260,6 +302,34 @@ class DIContainer {
 
   getRecordInventoryTransactionUseCase(): RecordInventoryTransactionUseCase {
     return this.dependencies.recordInventoryTransactionUseCase;
+  }
+
+  getGetInventoryItemUseCase(): GetInventoryItemUseCase {
+    return this.dependencies.getInventoryItemUseCase;
+  }
+
+  getListInventoryItemsUseCase(): ListInventoryItemsUseCase {
+    return this.dependencies.listInventoryItemsUseCase;
+  }
+
+  getUpdateInventoryItemUseCase(): UpdateInventoryItemUseCase {
+    return this.dependencies.updateInventoryItemUseCase;
+  }
+
+  getDeleteInventoryItemUseCase(): DeleteInventoryItemUseCase {
+    return this.dependencies.deleteInventoryItemUseCase;
+  }
+
+  getGetInventoryAlertsUseCase(): GetInventoryAlertsUseCase {
+    return this.dependencies.getInventoryAlertsUseCase;
+  }
+
+  getGetInventoryAnalyticsUseCase(): GetInventoryAnalyticsUseCase {
+    return this.dependencies.getInventoryAnalyticsUseCase;
+  }
+
+  getGetInventoryTransactionsUseCase(): GetInventoryTransactionsUseCase {
+    return this.dependencies.getInventoryTransactionsUseCase;
   }
 
   // Equipment Use Cases
