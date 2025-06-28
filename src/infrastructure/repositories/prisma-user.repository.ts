@@ -1,6 +1,10 @@
 import {PrismaClient} from '@prisma/client';
 import {User} from '@/core/domain/entities';
-import {UserRepository} from '@/core/domain/repositories';
+import {
+  UserRepository,
+  OAuthProviderData,
+  UserOrganization
+} from '@/core/domain/repositories';
 
 export class PrismaUserRepository implements UserRepository {
   constructor(private prisma: PrismaClient) {}
@@ -193,9 +197,9 @@ export class PrismaUserRepository implements UserRepository {
     const users = await this.prisma.user.findMany({
       where: {
         OR: [
-          {firstName: {contains: query, mode: 'insensitive'}},
-          {lastName: {contains: query, mode: 'insensitive'}},
-          {email: {contains: query, mode: 'insensitive'}}
+          {firstName: {contains: query}},
+          {lastName: {contains: query}},
+          {email: {contains: query}}
         ]
       },
       take: limit
@@ -221,6 +225,78 @@ export class PrismaUserRepository implements UserRepository {
     });
   }
 
+  // OAuth methods
+  async saveOAuthProvider(data: OAuthProviderData): Promise<void> {
+    await this.prisma.oAuthProvider.upsert({
+      where: {
+        provider_providerId: {
+          provider: data.provider,
+          providerId: data.providerId
+        }
+      },
+      create: {
+        userId: data.userId,
+        provider: data.provider,
+        providerId: data.providerId,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt
+      },
+      update: {
+        userId: data.userId,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt,
+        updatedAt: new Date()
+      }
+    });
+  }
+
+  async findByOAuthProvider(
+    provider: string,
+    providerId: string
+  ): Promise<User | null> {
+    const oauthProvider = await this.prisma.oAuthProvider.findFirst({
+      where: {
+        provider,
+        providerId
+      },
+      include: {
+        user: true
+      }
+    });
+
+    return oauthProvider ? this.toDomain(oauthProvider.user) : null;
+  }
+
+  async removeOAuthProvider(userId: string, provider: string): Promise<void> {
+    await this.prisma.oAuthProvider.deleteMany({
+      where: {
+        userId,
+        provider
+      }
+    });
+  }
+
+  // Organization methods
+  async findUserOrganizations(userId: string): Promise<UserOrganization[]> {
+    const memberships = await this.prisma.organizationMember.findMany({
+      where: {
+        userId
+      },
+      include: {
+        organization: true
+      }
+    });
+
+    return memberships.map((membership: any) => ({
+      id: membership.organization.id,
+      name: membership.organization.name,
+      slug: membership.organization.slug,
+      role: membership.role
+    }));
+  }
+
   private toDomain(user: {
     id: string;
     email: string;
@@ -243,12 +319,12 @@ export class PrismaUserRepository implements UserRepository {
       passwordHash: user.passwordHash,
       firstName: user.firstName,
       lastName: user.lastName,
-      phone: user.phone,
+      phone: user.phone ?? undefined,
       isEmailVerified: user.isEmailVerified,
-      emailVerifiedAt: user.emailVerifiedAt,
-      lastLoginAt: user.lastLoginAt,
+      emailVerifiedAt: user.emailVerifiedAt ?? undefined,
+      lastLoginAt: user.lastLoginAt ?? undefined,
       twoFactorEnabled: user.twoFactorEnabled,
-      twoFactorSecret: user.twoFactorSecret,
+      twoFactorSecret: user.twoFactorSecret ?? undefined,
       twoFactorBackupCodes: user.twoFactorBackupCodes
         ? JSON.parse(user.twoFactorBackupCodes)
         : undefined,

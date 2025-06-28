@@ -35,7 +35,7 @@ export class JwtService {
       expiresIn: this.accessTokenExpiry,
       issuer: 'farm-pilot',
       audience: 'farm-pilot-app'
-    });
+    } as jwt.SignOptions);
   }
 
   generateRefreshToken(user: User, organizationIds: string[]): string {
@@ -50,7 +50,7 @@ export class JwtService {
       expiresIn: this.refreshTokenExpiry,
       issuer: 'farm-pilot',
       audience: 'farm-pilot-app'
-    });
+    } as jwt.SignOptions);
   }
 
   generateTempToken(user: User): string {
@@ -65,7 +65,7 @@ export class JwtService {
       expiresIn: '10m', // Short expiry for 2FA verification
       issuer: 'farm-pilot',
       audience: 'farm-pilot-app'
-    });
+    } as jwt.SignOptions);
   }
 
   verifyAccessToken(token: string): JwtPayload {

@@ -48,6 +48,7 @@ import {
   PrismaInventoryRepository,
   PrismaEquipmentRepository
 } from '@/infrastructure/repositories';
+import {JwtService} from '@/infrastructure/auth/jwt.service';
 import {prisma} from '@/infrastructure/prisma/client';
 
 export interface Dependencies {
@@ -62,6 +63,9 @@ export interface Dependencies {
   livestockRepository: LivestockRepository;
   inventoryRepository: InventoryRepository;
   equipmentRepository: EquipmentRepository;
+
+  // Services
+  jwtService: JwtService;
 
   // Use Cases
   getCounterUseCase: GetCounterUseCase;
@@ -106,6 +110,9 @@ class DIContainer {
     const inventoryRepository = new PrismaInventoryRepository(prisma);
     const equipmentRepository = new PrismaEquipmentRepository(prisma);
 
+    // Infrastructure layer - Services
+    const jwtService = new JwtService();
+
     // Application layer - Use Cases
     const getCounterUseCase = new GetCounterUseCase(counterRepository);
     const incrementCounterUseCase = new IncrementCounterUseCase(
@@ -118,7 +125,7 @@ class DIContainer {
     );
     const loginUserUseCase = new LoginUserUseCase(userRepository);
     const enableTwoFactorUseCase = new EnableTwoFactorUseCase(userRepository);
-    const oauthLoginUseCase = new OAuthLoginUseCase(userRepository);
+    const oauthLoginUseCase = new OAuthLoginUseCase(userRepository, jwtService);
 
     const createFarmUseCase = new CreateFarmUseCase(
       farmRepository,
@@ -190,6 +197,9 @@ class DIContainer {
       inventoryRepository,
       equipmentRepository,
 
+      // Services
+      jwtService,
+
       // Use Cases
       getCounterUseCase,
       incrementCounterUseCase,
@@ -218,8 +228,8 @@ class DIContainer {
     };
   }
 
-  getDependencies(): Dependencies {
-    return this.dependencies;
+  get<T>(key: keyof Dependencies): T {
+    return this.dependencies[key] as T;
   }
 
   getCounterRepository(): CounterRepository {

@@ -35,11 +35,13 @@ const confirmTwoFactorSchema = z.object({
 });
 
 // Server functions
-export const registerUser = createServerFn('POST', async (data: unknown) => {
+export const registerUser = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
   try {
     const validatedData = registerSchema.parse(data);
     const registerUseCase = container.get<RegisterUserUseCase>(
-      'RegisterUserUseCase'
+      'registerUserUseCase'
     );
 
     const result = await registerUseCase.execute(validatedData);
@@ -71,10 +73,12 @@ export const registerUser = createServerFn('POST', async (data: unknown) => {
   }
 });
 
-export const loginUser = createServerFn('POST', async (data: unknown) => {
+export const loginUser = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
   try {
     const validatedData = loginSchema.parse(data);
-    const loginUseCase = container.get<LoginUserUseCase>('LoginUserUseCase');
+    const loginUseCase = container.get<LoginUserUseCase>('loginUserUseCase');
 
     const result = await loginUseCase.execute(validatedData);
 
@@ -103,11 +107,13 @@ export const loginUser = createServerFn('POST', async (data: unknown) => {
   }
 });
 
-export const enableTwoFactor = createServerFn('POST', async (data: unknown) => {
+export const enableTwoFactor = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
   try {
     const validatedData = enableTwoFactorSchema.parse(data);
     const enableTwoFactorUseCase = container.get<EnableTwoFactorUseCase>(
-      'EnableTwoFactorUseCase'
+      'enableTwoFactorUseCase'
     );
 
     const result = await enableTwoFactorUseCase.execute(validatedData);
@@ -127,41 +133,40 @@ export const enableTwoFactor = createServerFn('POST', async (data: unknown) => {
   }
 });
 
-export const confirmTwoFactor = createServerFn(
-  'POST',
-  async (data: unknown) => {
-    try {
-      const validatedData = confirmTwoFactorSchema.parse(data);
-      const enableTwoFactorUseCase = container.get<EnableTwoFactorUseCase>(
-        'EnableTwoFactorUseCase'
-      );
+export const confirmTwoFactor = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = confirmTwoFactorSchema.parse(data);
+    const enableTwoFactorUseCase = container.get<EnableTwoFactorUseCase>(
+      'enableTwoFactorUseCase'
+    );
 
-      const result = await enableTwoFactorUseCase.confirm(
-        validatedData.userId,
-        validatedData.secret,
-        validatedData.verificationCode
-      );
+    const result = await enableTwoFactorUseCase.confirm(
+      validatedData.userId,
+      validatedData.secret,
+      validatedData.verificationCode
+    );
 
-      return {
-        success: true,
-        data: {
-          user: {
-            id: result.id,
-            email: result.email,
-            firstName: result.firstName,
-            lastName: result.lastName,
-            twoFactorEnabled: result.twoFactorEnabled
-          }
+    return {
+      success: true,
+      data: {
+        user: {
+          id: result.id,
+          email: result.email,
+          firstName: result.firstName,
+          lastName: result.lastName,
+          twoFactorEnabled: result.twoFactorEnabled
         }
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to confirm two-factor authentication'
-      };
-    }
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to confirm two-factor authentication'
+    };
   }
-);
+});
