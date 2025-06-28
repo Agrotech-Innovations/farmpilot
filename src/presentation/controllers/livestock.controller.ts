@@ -729,3 +729,300 @@ export const getAnimalHealthHistory = createServerFn({
     };
   }
 });
+
+export const createVaccinationSchedule = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        animalIds: z.array(z.string().min(1)).optional(),
+        groupId: z.string().min(1).optional(),
+        scheduleItems: z.array(
+          z.object({
+            vaccinationType: z.string().min(1),
+            description: z.string().min(1),
+            intervalDays: z.number().min(1),
+            initialDate: z.string().transform((val) => new Date(val)),
+            veterinarian: z.string().optional(),
+            estimatedCost: z.number().min(0).optional(),
+            notes: z.string().optional()
+          })
+        ),
+        autoScheduleNext: z.boolean().optional()
+      })
+      .refine((data) => data.animalIds || data.groupId, {
+        message: 'Either animalIds or groupId must be provided'
+      })
+      .parse(data);
+
+    const createVaccinationScheduleUseCase = container.get<
+      import('@/core/application/use-cases/livestock').CreateVaccinationScheduleUseCase
+    >('createVaccinationScheduleUseCase');
+
+    const result = await createVaccinationScheduleUseCase.execute({
+      animalIds: validatedData.animalIds || [],
+      groupId: validatedData.groupId,
+      scheduleItems: validatedData.scheduleItems,
+      autoScheduleNext: validatedData.autoScheduleNext
+    });
+
+    return {
+      success: true,
+      data: {
+        scheduledVaccinations: result.scheduledVaccinations.map((record) => ({
+          id: record.id,
+          animalId: record.animalId,
+          recordType: record.recordType,
+          description: record.description,
+          veterinarian: record.veterinarian,
+          cost: record.cost,
+          notes: record.notes,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt
+        })),
+        totalAnimalsScheduled: result.totalAnimalsScheduled,
+        nextScheduledDates: result.nextScheduledDates
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create vaccination schedule'
+    };
+  }
+});
+
+export const getVaccinationSchedule = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        animalId: z.string().min(1).optional(),
+        groupId: z.string().min(1).optional(),
+        farmId: z.string().min(1).optional(),
+        vaccinationType: z.string().optional(),
+        daysAhead: z.number().min(1).optional(),
+        includeCompleted: z.boolean().optional()
+      })
+      .refine((data) => data.animalId || data.groupId || data.farmId, {
+        message: 'Either animalId, groupId, or farmId must be provided'
+      })
+      .parse(data);
+
+    const getVaccinationScheduleUseCase = container.get<
+      import('@/core/application/use-cases/livestock').GetVaccinationScheduleUseCase
+    >('getVaccinationScheduleUseCase');
+
+    const result = await getVaccinationScheduleUseCase.execute(validatedData);
+
+    return {
+      success: true,
+      data: result
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get vaccination schedule'
+    };
+  }
+});
+
+export const updateVaccinationStatus = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        vaccinationRecordId: z.string().min(1),
+        status: z.enum(['completed', 'rescheduled', 'cancelled']),
+        completedDate: z
+          .string()
+          .optional()
+          .transform((val) => (val ? new Date(val) : undefined)),
+        rescheduledDate: z
+          .string()
+          .optional()
+          .transform((val) => (val ? new Date(val) : undefined)),
+        actualVeterinarian: z.string().optional(),
+        actualCost: z.number().min(0).optional(),
+        completionNotes: z.string().optional(),
+        scheduleNextVaccination: z.boolean().optional(),
+        nextVaccinationIntervalDays: z.number().min(1).optional()
+      })
+      .parse(data);
+
+    const updateVaccinationStatusUseCase = container.get<
+      import('@/core/application/use-cases/livestock').UpdateVaccinationStatusUseCase
+    >('updateVaccinationStatusUseCase');
+
+    const result = await updateVaccinationStatusUseCase.execute(validatedData);
+
+    return {
+      success: true,
+      data: {
+        updatedRecord: {
+          id: result.updatedRecord.id,
+          animalId: result.updatedRecord.animalId,
+          recordType: result.updatedRecord.recordType,
+          description: result.updatedRecord.description,
+          veterinarian: result.updatedRecord.veterinarian,
+          cost: result.updatedRecord.cost,
+          notes: result.updatedRecord.notes,
+          createdAt: result.updatedRecord.createdAt,
+          updatedAt: result.updatedRecord.updatedAt
+        },
+        nextVaccinationRecord: result.nextVaccinationRecord
+          ? {
+              id: result.nextVaccinationRecord.id,
+              animalId: result.nextVaccinationRecord.animalId,
+              recordType: result.nextVaccinationRecord.recordType,
+              description: result.nextVaccinationRecord.description,
+              veterinarian: result.nextVaccinationRecord.veterinarian,
+              cost: result.nextVaccinationRecord.cost,
+              notes: result.nextVaccinationRecord.notes,
+              createdAt: result.nextVaccinationRecord.createdAt,
+              updatedAt: result.nextVaccinationRecord.updatedAt
+            }
+          : undefined
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update vaccination status'
+    };
+  }
+});
+
+export const getVaccinationReminders = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        farmId: z.string().min(1),
+        daysAhead: z.number().min(1).optional(),
+        includeOverdue: z.boolean().optional(),
+        vaccinationType: z.string().optional(),
+        priorityLevel: z.enum(['high', 'medium', 'low', 'all']).optional()
+      })
+      .parse(data);
+
+    const getVaccinationRemindersUseCase = container.get<
+      import('@/core/application/use-cases/livestock').GetVaccinationRemindersUseCase
+    >('getVaccinationRemindersUseCase');
+
+    const result = await getVaccinationRemindersUseCase.execute(validatedData);
+
+    return {
+      success: true,
+      data: result
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get vaccination reminders'
+    };
+  }
+});
+
+export const bulkScheduleVaccinations = createServerFn({
+  method: 'POST'
+}).handler(async (data: unknown) => {
+  try {
+    const validatedData = z
+      .object({
+        farmId: z.string().min(1).optional(),
+        groupIds: z.array(z.string().min(1)).optional(),
+        animalIds: z.array(z.string().min(1)).optional(),
+        vaccinationSchedules: z.array(
+          z.object({
+            vaccinationType: z.string().min(1),
+            description: z.string().min(1),
+            scheduledDate: z.string().transform((val) => new Date(val)),
+            veterinarian: z.string().optional(),
+            estimatedCost: z.number().min(0).optional(),
+            notes: z.string().optional()
+          })
+        ),
+        filterCriteria: z
+          .object({
+            species: z.string().optional(),
+            breed: z.string().optional(),
+            ageMinDays: z.number().min(0).optional(),
+            ageMaxDays: z.number().min(0).optional(),
+            healthStatus: z
+              .array(z.enum(['healthy', 'sick', 'injured', 'deceased']))
+              .optional()
+          })
+          .optional(),
+        skipIfRecentlyVaccinated: z.boolean().optional(),
+        recentVaccinationDays: z.number().min(1).optional()
+      })
+      .refine((data) => data.farmId || data.groupIds || data.animalIds, {
+        message: 'Either farmId, groupIds, or animalIds must be provided'
+      })
+      .parse(data);
+
+    const bulkScheduleVaccinationsUseCase = container.get<
+      import('@/core/application/use-cases/livestock').BulkScheduleVaccinationsUseCase
+    >('bulkScheduleVaccinationsUseCase');
+
+    const result = await bulkScheduleVaccinationsUseCase.execute(validatedData);
+
+    return {
+      success: true,
+      data: {
+        results: result.results.map((item) => ({
+          animalId: item.animalId,
+          animalTagNumber: item.animalTagNumber,
+          animalName: item.animalName,
+          groupId: item.groupId,
+          scheduledVaccinations: item.scheduledVaccinations.map((record) => ({
+            id: record.id,
+            animalId: record.animalId,
+            recordType: record.recordType,
+            description: record.description,
+            treatment: record.treatment,
+            medication: record.medication,
+            dosage: record.dosage,
+            veterinarian: record.veterinarian,
+            cost: record.cost,
+            notes: record.notes,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt
+          })),
+          skippedVaccinations: item.skippedVaccinations,
+          errors: item.errors
+        })),
+        totalAnimalsProcessed: result.totalAnimalsProcessed,
+        totalVaccinationsScheduled: result.totalVaccinationsScheduled,
+        totalSkipped: result.totalSkipped,
+        totalErrors: result.totalErrors,
+        summary: result.summary
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to bulk schedule vaccinations'
+    };
+  }
+});

@@ -36,6 +36,11 @@ import {
   GetHealthRecordsUseCase,
   UpdateAnimalHealthStatusUseCase,
   ScheduleVaccinationUseCase,
+  CreateVaccinationScheduleUseCase,
+  GetVaccinationScheduleUseCase,
+  UpdateVaccinationStatusUseCase,
+  GetVaccinationRemindersUseCase,
+  BulkScheduleVaccinationsUseCase,
   GetLivestockHealthAnalyticsUseCase,
   RecordTreatmentUseCase,
   GetAnimalHealthHistoryUseCase,
@@ -120,6 +125,11 @@ export interface Dependencies {
   getHealthRecordsUseCase: GetHealthRecordsUseCase;
   updateAnimalHealthStatusUseCase: UpdateAnimalHealthStatusUseCase;
   scheduleVaccinationUseCase: ScheduleVaccinationUseCase;
+  createVaccinationScheduleUseCase: CreateVaccinationScheduleUseCase;
+  getVaccinationScheduleUseCase: GetVaccinationScheduleUseCase;
+  updateVaccinationStatusUseCase: UpdateVaccinationStatusUseCase;
+  getVaccinationRemindersUseCase: GetVaccinationRemindersUseCase;
+  bulkScheduleVaccinationsUseCase: BulkScheduleVaccinationsUseCase;
   getLivestockHealthAnalyticsUseCase: GetLivestockHealthAnalyticsUseCase;
   recordTreatmentUseCase: RecordTreatmentUseCase;
   getAnimalHealthHistoryUseCase: GetAnimalHealthHistoryUseCase;
@@ -235,6 +245,20 @@ class DIContainer {
       livestockRepository
     );
     const scheduleVaccinationUseCase = new ScheduleVaccinationUseCase(
+      livestockRepository
+    );
+    const createVaccinationScheduleUseCase =
+      new CreateVaccinationScheduleUseCase(livestockRepository);
+    const getVaccinationScheduleUseCase = new GetVaccinationScheduleUseCase(
+      livestockRepository
+    );
+    const updateVaccinationStatusUseCase = new UpdateVaccinationStatusUseCase(
+      livestockRepository
+    );
+    const getVaccinationRemindersUseCase = new GetVaccinationRemindersUseCase(
+      livestockRepository
+    );
+    const bulkScheduleVaccinationsUseCase = new BulkScheduleVaccinationsUseCase(
       livestockRepository
     );
     const getLivestockHealthAnalyticsUseCase =
@@ -355,6 +379,11 @@ class DIContainer {
       getHealthRecordsUseCase,
       updateAnimalHealthStatusUseCase,
       scheduleVaccinationUseCase,
+      createVaccinationScheduleUseCase,
+      getVaccinationScheduleUseCase,
+      updateVaccinationStatusUseCase,
+      getVaccinationRemindersUseCase,
+      bulkScheduleVaccinationsUseCase,
       getLivestockHealthAnalyticsUseCase,
       recordTreatmentUseCase,
       getAnimalHealthHistoryUseCase,
