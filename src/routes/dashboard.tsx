@@ -23,8 +23,8 @@ import {
   Activity
 } from 'lucide-react';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {CropPlanningCalendar} from '@/components/farm/crop-planning-calendar';
-import {LivestockHealthDashboard} from '@/components/farm/livestock-health-dashboard';
+import {CropPlanningCalendar} from '@/components/farm/features/crops/crop-planning-calendar';
+import {LivestockHealthDashboard} from '@/components/farm/features/livestock/livestock-health-dashboard';
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage
