@@ -12,10 +12,11 @@ export class PrismaLivestockRepository implements LivestockRepository {
   // Livestock Groups
   async findGroupsByFarm(farmId: string): Promise<LivestockGroup[]> {
     const groups = await this.prisma.livestockGroup.findMany({
-      where: {farmId}
+      where: {farmId},
+      orderBy: {name: 'asc'}
     });
 
-    return groups.map((group) => this.toDomainGroup(group));
+    return groups.map((group) => this.groupToDomain(group));
   }
 
   async findGroupById(id: string): Promise<LivestockGroup | null> {
@@ -23,7 +24,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
       where: {id}
     });
 
-    return group ? this.toDomainGroup(group) : null;
+    return group ? this.groupToDomain(group) : null;
   }
 
   async saveGroup(group: LivestockGroup): Promise<void> {
@@ -58,10 +59,11 @@ export class PrismaLivestockRepository implements LivestockRepository {
   // Livestock Animals
   async findAnimalsByGroup(groupId: string): Promise<LivestockAnimal[]> {
     const animals = await this.prisma.livestockAnimal.findMany({
-      where: {groupId}
+      where: {groupId},
+      orderBy: {tagNumber: 'asc'}
     });
 
-    return animals.map((animal) => this.toDomainAnimal(animal));
+    return animals.map((animal) => this.animalToDomain(animal));
   }
 
   async findAnimalById(id: string): Promise<LivestockAnimal | null> {
@@ -69,7 +71,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
       where: {id}
     });
 
-    return animal ? this.toDomainAnimal(animal) : null;
+    return animal ? this.animalToDomain(animal) : null;
   }
 
   async findAnimalByTagNumber(
@@ -85,7 +87,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
       }
     });
 
-    return animal ? this.toDomainAnimal(animal) : null;
+    return animal ? this.animalToDomain(animal) : null;
   }
 
   async saveAnimal(animal: LivestockAnimal): Promise<void> {
@@ -107,7 +109,6 @@ export class PrismaLivestockRepository implements LivestockRepository {
         updatedAt: animal.updatedAt
       },
       update: {
-        tagNumber: animal.tagNumber,
         name: animal.name,
         sex: animal.sex,
         birthDate: animal.birthDate,
@@ -134,7 +135,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
       orderBy: {createdAt: 'desc'}
     });
 
-    return records.map((record) => this.toDomainHealthRecord(record));
+    return records.map((record) => this.healthRecordToDomain(record));
   }
 
   async findHealthRecordById(id: string): Promise<HealthRecord | null> {
@@ -142,7 +143,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
       where: {id}
     });
 
-    return record ? this.toDomainHealthRecord(record) : null;
+    return record ? this.healthRecordToDomain(record) : null;
   }
 
   async saveHealthRecord(record: HealthRecord): Promise<void> {
@@ -204,19 +205,22 @@ export class PrismaLivestockRepository implements LivestockRepository {
         healthStatus: {
           in: ['sick', 'injured']
         }
-      }
+      },
+      orderBy: {tagNumber: 'asc'}
     });
 
-    return animals.map((animal) => this.toDomainAnimal(animal));
+    return animals.map((animal) => this.animalToDomain(animal));
   }
 
   async findUpcomingVaccinations(
     farmId: string,
-    daysAhead: number = 30
+    daysAhead = 30
   ): Promise<HealthRecord[]> {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + daysAhead);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() + daysAhead);
 
+    // This is a simplified implementation. In a real system, you'd probably have
+    // a separate vaccination schedule table or recurring vaccination records
     const records = await this.prisma.healthRecord.findMany({
       where: {
         animal: {
@@ -226,18 +230,30 @@ export class PrismaLivestockRepository implements LivestockRepository {
         },
         recordType: 'vaccination',
         createdAt: {
-          gte: new Date(),
-          lte: futureDate
+          gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) // Last year
         }
       },
-      orderBy: {createdAt: 'asc'}
+      include: {
+        animal: true
+      },
+      orderBy: {createdAt: 'desc'}
     });
 
-    return records.map((record) => this.toDomainHealthRecord(record));
+    // Filter for animals that might need follow-up vaccinations
+    // This is a basic implementation - in practice, you'd have more sophisticated logic
+    return records
+      .filter((record) => {
+        const daysSinceVaccination = Math.floor(
+          (Date.now() - record.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        // Assume annual vaccinations need renewal after 330 days (allowing 35 days buffer)
+        return daysSinceVaccination >= 330;
+      })
+      .map((record) => this.healthRecordToDomain(record));
   }
 
-  // Domain conversion methods
-  private toDomainGroup(group: {
+  // Domain mapping methods
+  private groupToDomain(group: {
     id: string;
     farmId: string;
     name: string;
@@ -259,7 +275,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
     });
   }
 
-  private toDomainAnimal(animal: {
+  private animalToDomain(animal: {
     id: string;
     groupId: string;
     tagNumber: string;
@@ -295,7 +311,7 @@ export class PrismaLivestockRepository implements LivestockRepository {
     });
   }
 
-  private toDomainHealthRecord(record: {
+  private healthRecordToDomain(record: {
     id: string;
     animalId: string;
     recordType: string;
