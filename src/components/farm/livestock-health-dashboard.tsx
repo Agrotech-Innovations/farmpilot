@@ -112,10 +112,10 @@ export function LivestockHealthDashboard({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-primary">
             Livestock Health Dashboard
           </h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Monitor animal health and schedule treatments
           </p>
         </div>
@@ -201,7 +201,7 @@ export function LivestockHealthDashboard({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  <AlertTriangle className="w-5 h-5 text-chart-3" />
                   Animals Needing Attention
                 </CardTitle>
               </CardHeader>
@@ -212,13 +212,13 @@ export function LivestockHealthDashboard({
                     .map((animal) => (
                       <div
                         key={animal.id}
-                        className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-secondary border border-chart-3 rounded-lg"
                       >
                         <div>
                           <h4 className="font-medium">
                             {animal.name || `Tag #${animal.tagNumber}`}
                           </h4>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             {animal.species} • {animal.breed}
                           </p>
                         </div>
@@ -242,7 +242,7 @@ export function LivestockHealthDashboard({
                     ))}
                   {animals.filter((animal) => animal.healthStatus !== 'healthy')
                     .length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="text-muted-foreground text-center py-4">
                       All animals are healthy! 🎉
                     </p>
                   )}

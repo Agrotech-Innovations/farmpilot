@@ -90,10 +90,10 @@ export function CropPlanningCalendar({
       {/* Header with quick actions */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-primary">
             Crop Planning Calendar
           </h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Plan and track your crop rotations and planting schedules
           </p>
         </div>
@@ -199,11 +199,13 @@ export function CropPlanningCalendar({
               return (
                 <div
                   key={field.id}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 transition-colors cursor-pointer"
+                  className="p-4 border-2 border-dashed border-card-foreground rounded-lg hover:border-chart-2 transition-colors cursor-pointer"
                   onClick={() => onCreateCropPlan(field.id, new Date())}
                 >
-                  <h3 className="font-semibold text-gray-900">{field.name}</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="font-semibold text-secondary-foreground">
+                    {field.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
                     {field.acres} acres • {field.soilType}
                   </p>
 
@@ -211,7 +213,7 @@ export function CropPlanningCalendar({
                     <div className="mt-2 space-y-1">
                       {fieldCrops.map((crop) => (
                         <div key={crop.id} className="text-sm">
-                          <span className="font-medium text-green-700">
+                          <span className="font-medium text-chart-2">
                             {crop.cropName}
                           </span>
                           <Badge
@@ -223,7 +225,7 @@ export function CropPlanningCalendar({
                       ))}
                     </div>
                   ) : (
-                    <div className="mt-2 text-sm text-gray-500">
+                    <div className="mt-2 text-sm text-muted-foreground">
                       Available for planting
                     </div>
                   )}
