@@ -1,302 +1,133 @@
-# Agrotech Innovations Farm Pilot
+# 🌱 Farm Pilot
 
-A modern SaaS for managing and monitoring farms.
+> Modern SaaS platform for comprehensive farm management and monitoring
 
-## 🚀 Tech Stack
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.1.0-blue?logo=react)](https://reactjs.org/)
+[![TanStack Start](https://img.shields.io/badge/TanStack%20Start-latest-orange)](https://tanstack.com/start)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-green)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
-### Frontend
+Farm Pilot is an enterprise-grade agricultural management platform built with Clean Architecture principles, featuring advanced livestock management, multi-tenant SaaS architecture, and comprehensive farm operations tracking.
 
-- **React 19.1.0** with TypeScript
-- **TanStack Start** - Full-stack React framework
-- **TanStack Router** - Type-safe file-based routing
-- **Tailwind CSS 4.1.11** - Utility-first CSS framework
-- **shadcn/ui** - High-quality accessible component library
-- **Radix UI** - Primitive components for complex UI
-- **Lucide React** - Beautiful icon library
-
-### Backend & Database
-
-- **TanStack Start Server Functions** - Full-stack capabilities
-- **Prisma** - Modern database toolkit and ORM
-- **SQLite** - Lightweight database
-
-### Development Tools
-
-- **Vite 7.0.0** - Lightning-fast build tool
-- **TypeScript 5.8.3** - Type safety and enhanced DX
-- **ESLint** - Code linting with comprehensive presets
-- **Prettier** - Code formatting
-- **Vitest** - Fast unit testing framework
-
-## 📋 Prerequisites
-
-- **Node.js** (version 18 or higher)
-- **npm** or **yarn** or **pnpm**
-
-## 🛠️ Installation
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone git@github.com:Agrotech-Innovations/farmpilot.git
-   cd farmpilot
-   ```
-
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables:**
-
-   Create a `.env` file in the root directory with the following content:
-
-   ```env
-   # Database
-   DATABASE_URL="file:./dev.db"
-   ```
-
-4. **Set up the database:**
-
-   Generate the Prisma client from the schema:
-
-   ```bash
-   npm run db:generate
-   ```
-
-   Create the SQLite database and apply the schema:
-
-   ```bash
-   npm run db:push
-   ```
-
-## 🚀 Development
-
-### Start the development server:
+## 🚀 **Quick Start**
 
 ```bash
+# Clone the repository
+git clone [repository-url]
+cd farmpilot
+
+# Install dependencies
+npm install
+
+# Setup database
+npx prisma migrate dev
+
+# Start development server
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`
+**→ For detailed setup instructions, see [Setup Guide](./docs/user-guides/SETUP_GUIDE.md)**
 
-### Available Scripts
+## 📚 **Documentation**
 
-#### Development
+### **📖 Complete Documentation Hub**
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+**[→ View All Documentation](./docs/README.md)**
 
-#### Code Quality
+### **🎯 Quick Links**
 
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
+- **[Project Overview](./docs/FARM_PILOT_README.md)** - Comprehensive project details and current status
+- **[Setup Guide](./docs/user-guides/SETUP_GUIDE.md)** - Installation and configuration
+- **[API Documentation](./docs/api/API_DOCUMENTATION.md)** - Complete API reference (30+ endpoints)
+- **[Frontend Integration](./docs/user-guides/FRONTEND_INTEGRATION_GUIDE.md)** - Connect UI to backend APIs
 
-#### Testing
+### **🏗️ Architecture**
 
-- `npm test` - Run tests with Vitest
-- `npm run test:run` - Run tests once
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage
+- **[Clean Architecture](./docs/technical/CLEAN_ARCHITECTURE.md)** - Code organization principles
+- **[Multi-Tenant SaaS](./docs/technical/MULTI_TENANT_ARCHITECTURE.md)** - Enterprise architecture design
 
-#### Database
+## 🎯 **Current Status**
 
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema changes to database
-- `npm run db:migrate` - Create and apply migrations
-- `npm run db:studio` - Open Prisma Studio for database management
+### **✅ Production-Ready Backend (95% Complete)**
 
-## 🏗️ Clean Architecture Structure
+- 30+ API endpoints with comprehensive validation
+- 50+ business use cases across 8 major domains
+- Multi-tenant architecture with organization isolation
+- Advanced livestock management exceeding industry standards
 
-This project follows **Clean Architecture** principles with clear separation of concerns and dependency inversion. For detailed architecture documentation, see [CLEAN_ARCHITECTURE.md](./CLEAN_ARCHITECTURE.md).
+### **🔧 UI Integration Needed (Critical Priority)**
 
-```
-tanstack-start-clean-architecture/
-├── prisma/                         # Database schema and migrations
-│   └── schema.prisma
-├── src/
-│   ├── core/                       # Core Business Logic (Domain + Application Layers)
-│   │   ├── domain/                 # 🟦 Domain Layer (Innermost)
-│   │   │   ├── entities/           # Business entities with domain logic
-│   │   │   │   ├── base.entity.ts  # Base entity with common properties
-│   │   │   │   ├── counter.entity.ts # Counter business entity
-│   │   │   │   └── index.ts        # Domain entities barrel export
-│   │   │   ├── events/             # Domain events
-│   │   │   │   └── index.ts
-│   │   │   ├── repositories/       # Repository interfaces (contracts)
-│   │   │   │   ├── counter.repository.ts
-│   │   │   │   └── index.ts
-│   │   │   └── value-objects/      # Domain value objects
-│   │   │       └── index.ts
-│   │   └── application/            # 🟨 Application Layer
-│   │       ├── dtos/               # Data Transfer Objects
-│   │       │   └── index.ts
-│   │       ├── services/           # Application services
-│   │       │   └── index.ts
-│   │       └── use-cases/          # Use cases (business operations)
-│   │           ├── counter/
-│   │           │   ├── get-counter.use-case.ts
-│   │           │   ├── increment-counter.use-case.ts
-│   │           │   └── index.ts
-│   │           └── index.ts
-│   ├── infrastructure/             # 🟩 Infrastructure Layer
-│   │   ├── di/                     # Dependency Injection
-│   │   │   ├── container.ts        # DI container
-│   │   │   └── index.ts
-│   │   └── repositories/           # Repository implementations
-│   │       ├── prisma-counter.repository.ts
-│   │       └── index.ts
-│   ├── presentation/               # 🟪 Presentation Layer
-│   │   └── controllers/            # HTTP request handlers
-│   │       ├── counter.controller.ts
-│   │       └── index.ts
-│   ├── components/                 # React UI components
-│   │   ├── theme-provider.tsx
-│   │   └── ui/                     # shadcn/ui components
-│   │       └── button.tsx
-│   ├── lib/                        # Utility functions
-│   │   └── utils.ts
-│   ├── routes/                     # File-based routing (TanStack Router)
-│   │   ├── __root.tsx              # Root layout
-│   │   └── index.tsx               # Home page
-│   ├── styles/                     # Global styles
-│   │   └── app.css
-│   ├── tests/                      # Test files organized by layer
-│   │   ├── application/
-│   │   │   └── use-cases/
-│   │   │       └── get-counter.use-case.test.ts
-│   │   ├── domain/
-│   │   │   └── entities/
-│   │   │       └── counter.entity.test.ts
-│   │   └── setup.ts
-│   ├── router.tsx                  # Router configuration
-│   └── routeTree.gen.ts            # Generated route tree
-├── components.json                 # shadcn/ui configuration
-├── package.json
-├── tsconfig.json                   # TypeScript configuration
-├── vite.config.ts                  # Vite configuration
-├── eslint.config.mjs               # ESLint configuration
-├── CLEAN_ARCHITECTURE.md           # Detailed architecture documentation
-└── README.md
-```
+- Backend APIs are production-ready but **not connected to UI**
+- All components currently use mock data
+- **Solution**: Install TanStack Query and connect components to real APIs
 
-## 🧱 Architecture Layers
+### **📊 Feature Matrix**
 
-### 🟦 Domain Layer (`src/core/domain/`)
+| Domain                        | Backend | Frontend | Priority   |
+| ----------------------------- | ------- | -------- | ---------- |
+| **Livestock Management**      | 95% ✅  | 20% ❌   | **URGENT** |
+| **Multi-Tenant Architecture** | 95% ✅  | 60% 🔧   | High       |
+| **Inventory Management**      | 90% ✅  | 30% 🔧   | High       |
+| **Equipment Management**      | 90% ✅  | 40% 🔧   | High       |
 
-The innermost layer containing pure business logic:
+**→ See [Implementation Status](./docs/implementation/IMPLEMENTATION_STATUS_SUMMARY.md) for complete details**
 
-- **Entities**: Core business objects with domain rules (e.g., `Counter`)
-- **Repository Interfaces**: Contracts for data access
-- **Domain Events**: Business events within the domain
-- **Value Objects**: Immutable domain concepts
+## 🏆 **Key Features**
 
-### 🟨 Application Layer (`src/core/application/`)
+### **🐄 Advanced Livestock Management**
 
-Orchestrates business operations:
+- Sophisticated vaccination scheduling with reminders
+- Complete breeding lifecycle management
+- Veterinary health tracking and analytics
+- **[View Details](./docs/implementation/ADVANCED_VACCINATION_SYSTEM.md)**
 
-- **Use Cases**: Application-specific business rules
-- **DTOs**: Data transfer objects for layer communication
-- **Services**: Application services coordinating domain objects
+### **🏢 Enterprise SaaS Architecture**
 
-### 🟩 Infrastructure Layer (`src/infrastructure/`)
+- Multi-tenant data isolation
+- Organization-based subscription limits
+- JWT authentication with 2FA support
+- **[View Details](./docs/technical/MULTI_TENANT_ARCHITECTURE.md)**
 
-Handles external concerns:
+### **📊 Intelligent Monitoring**
 
-- **Repository Implementations**: Concrete data access implementations
-- **Dependency Injection**: DI container for managing dependencies
-- **External Services**: Third-party integrations
+- Real-time alert systems for inventory, health, and equipment
+- Predictive maintenance scheduling
+- Comprehensive analytics dashboards
+- **[View Details](./docs/implementation/ALERT_NOTIFICATION_SYSTEM.md)**
 
-### 🟪 Presentation Layer (`src/presentation/`)
+## 🛠️ **Technology Stack**
 
-User interface and API endpoints:
+- **Frontend**: React 19.1.0, TanStack Start, TypeScript 5.8.3
+- **Styling**: Tailwind CSS 4.1.11, shadcn/ui, Radix UI
+- **Backend**: TanStack Start Server Functions, Prisma ORM
+- **Database**: SQLite (development), PostgreSQL (production)
+- **Architecture**: Clean Architecture with dependency injection
 
-- **Controllers**: HTTP request/response handlers using TanStack Start
-- **Routes**: Application routing with TanStack Router
-- **Components**: React UI components
+## 🚨 **Critical Next Steps**
 
-## 🧪 Testing Strategy
+1. **Install TanStack Query** for state management
+2. **Connect UI components** to existing APIs
+3. **Replace mock data** with real API calls
+4. **Add loading states** and error handling
 
-The project includes comprehensive testing organized by architecture layer:
+**→ Follow [Frontend Integration Guide](./docs/user-guides/FRONTEND_INTEGRATION_GUIDE.md) for step-by-step instructions**
 
-```
-src/tests/
-├── application/        # Application layer tests
-├── domain/            # Domain layer tests
-├── infrastructure/    # Infrastructure layer tests
-└── presentation/      # Presentation layer tests
-```
+## 🤝 **Contributing**
 
-### Test Types
+1. Review [Clean Architecture guidelines](./docs/technical/CLEAN_ARCHITECTURE.md)
+2. Check [Implementation Status](./docs/implementation/IMPLEMENTATION_STATUS_SUMMARY.md)
+3. Follow existing patterns in the codebase
+4. Test your changes thoroughly
 
-- **Unit Tests**: Testing individual components and business logic
-- **Integration Tests**: Testing layer interactions
-- **End-to-End Tests**: Testing complete user workflows
+## 📞 **Support**
 
-## 🗄️ Database
+- **Setup Issues**: [Setup Guide](./docs/user-guides/SETUP_GUIDE.md)
+- **API Questions**: [API Documentation](./docs/api/API_DOCUMENTATION.md)
+- **Architecture Help**: [Technical Documentation](./docs/technical/)
+- **Feature Status**: [Implementation Guides](./docs/implementation/)
 
-This project uses **SQLite** with **Prisma** for data persistence.
+---
 
-### Database Schema
+**Farm Pilot** - Built with ❤️ for modern agricultural management
 
-The application uses a simple `Counter` table with the following structure:
-
-```prisma
-model Counter {
-  id        String   @id
-  value     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
-### Repository Implementation
-
-The counter persistence uses database storage (`PrismaCounterRepository`):
-
-- Implements the `CounterRepository` interface
-- Uses SQLite for data persistence
-- Supports the default counter with automatic creation
-- Handles upsert operations for counter updates
-- Maintains full compatibility with existing use cases
-
-_Note: The Prisma client is generated to the standard location (`node_modules/@prisma/client`) for better ES module compatibility with Vite/TanStack Start._
-
-## 🎯 Features
-
-This boilerplate includes:
-
-- ✅ **Clean Architecture** implementation
-- ✅ **Type-safe routing** with TanStack Router
-- ✅ **Server-side rendering** with TanStack Start
-- ✅ **Database integration** with Prisma + SQLite
-- ✅ **UI components** with shadcn/ui
-- ✅ **Testing setup** with Vitest
-- ✅ **Code quality** with ESLint and Prettier
-- ✅ **Dependency injection** container
-- ✅ **Example counter feature** demonstrating architecture
-
-## 📚 Learn More
-
-- [TanStack Start Documentation](https://tanstack.com/start)
-- [TanStack Router Documentation](https://tanstack.com/router)
-- [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [shadcn/ui Documentation](https://ui.shadcn.com)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines and submit pull requests for any improvements.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Clean Architecture principles by Robert C. Martin
-- TanStack team for amazing React tools
-- shadcn for the beautiful UI components
-- The open-source community for inspiration and tools
+**[📚 → Browse All Documentation](./docs/README.md)**
