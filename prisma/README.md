@@ -57,7 +57,6 @@ The schema has been logically separated into the following domain-specific files
 #### Legacy
 
 - **`legacy.prisma`** - Backward compatibility models
-  - `Counter` - Legacy counter model (to be deprecated)
 
 ## Working with Modular Schemas
 

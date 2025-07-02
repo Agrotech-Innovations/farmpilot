@@ -1,5 +1,4 @@
 // Presentation controllers barrel file
-export * from './counter.controller';
 export * from './livestock.controller';
 export * from './breeding.controller';
 export * from './equipment.controller';

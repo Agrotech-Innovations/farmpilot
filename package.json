@@ -10,7 +10,6 @@
   ],
   "author": "Agrotech Innovations LLC",
   "homepage": "https://agrotechinnov.com",
-  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite dev",

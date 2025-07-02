@@ -1,11 +1,3 @@
 // ======================
 // Legacy Models
-// ======================
-
-// Keep the original Counter model for backward compatibility during migration
-model Counter {
-  id        String   @id
-  value     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-} 
+// ====================== 

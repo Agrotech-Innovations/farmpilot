@@ -1,5 +1,4 @@
 import {
-  CounterRepository,
   UserRepository,
   FarmRepository,
   OrganizationRepository,
@@ -11,8 +10,6 @@ import {
   EquipmentRepository
 } from '@/core/domain/repositories';
 import {
-  GetCounterUseCase,
-  IncrementCounterUseCase,
   RegisterUserUseCase,
   LoginUserUseCase,
   EnableTwoFactorUseCase,
@@ -70,7 +67,6 @@ import {
   GetEquipmentAnalyticsUseCase
 } from '@/core/application/use-cases';
 import {
-  PrismaCounterRepository,
   PrismaUserRepository,
   PrismaFarmRepository,
   PrismaOrganizationRepository,
@@ -86,7 +82,6 @@ import {prisma} from '@/infrastructure/prisma/client';
 
 export interface Dependencies {
   // Repositories
-  counterRepository: CounterRepository;
   userRepository: UserRepository;
   farmRepository: FarmRepository;
   organizationRepository: OrganizationRepository;
@@ -101,8 +96,6 @@ export interface Dependencies {
   jwtService: JwtService;
 
   // Use Cases
-  getCounterUseCase: GetCounterUseCase;
-  incrementCounterUseCase: IncrementCounterUseCase;
   registerUserUseCase: RegisterUserUseCase;
   loginUserUseCase: LoginUserUseCase;
   enableTwoFactorUseCase: EnableTwoFactorUseCase;
@@ -165,7 +158,6 @@ class DIContainer {
 
   constructor() {
     // Infrastructure layer - Repositories
-    const counterRepository = new PrismaCounterRepository(prisma);
     const userRepository = new PrismaUserRepository(prisma);
     const organizationRepository = new PrismaOrganizationRepository(prisma);
     const farmRepository = new PrismaFarmRepository(prisma);
@@ -180,11 +172,6 @@ class DIContainer {
     const jwtService = new JwtService();
 
     // Application layer - Use Cases
-    const getCounterUseCase = new GetCounterUseCase(counterRepository);
-    const incrementCounterUseCase = new IncrementCounterUseCase(
-      counterRepository
-    );
-
     const registerUserUseCase = new RegisterUserUseCase(
       userRepository,
       organizationRepository
@@ -344,7 +331,6 @@ class DIContainer {
 
     this.dependencies = {
       // Repositories
-      counterRepository,
       userRepository,
       farmRepository,
       organizationRepository,
@@ -359,8 +345,6 @@ class DIContainer {
       jwtService,
 
       // Use Cases
-      getCounterUseCase,
-      incrementCounterUseCase,
       registerUserUseCase,
       loginUserUseCase,
       enableTwoFactorUseCase,
@@ -421,18 +405,6 @@ class DIContainer {
 
   get<T>(key: keyof Dependencies): T {
     return this.dependencies[key] as T;
-  }
-
-  getCounterRepository(): CounterRepository {
-    return this.dependencies.counterRepository;
-  }
-
-  getCounterUseCase(): GetCounterUseCase {
-    return this.dependencies.getCounterUseCase;
-  }
-
-  getIncrementCounterUseCase(): IncrementCounterUseCase {
-    return this.dependencies.incrementCounterUseCase;
   }
 
   // Livestock Use Cases

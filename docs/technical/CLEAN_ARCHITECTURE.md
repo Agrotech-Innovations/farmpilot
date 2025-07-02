@@ -49,28 +49,36 @@ src/
 │   ├── domain/                     # Domain Layer
 │   │   ├── entities/               # Business entities
 │   │   │   ├── base.entity.ts      # Base entity with common properties
-│   │   │   ├── counter.entity.ts   # Counter business entity (example)
+│   │   │   ├── farm.entity.ts      # Farm business entity
+│   │   │   ├── livestock.entity.ts # Livestock business entity
 │   │   │   └── index.ts            # Domain entities barrel export
 │   │   └── repositories/           # Repository interfaces
-│   │       ├── counter.repository.ts
+│   │       ├── farm.repository.ts
+│   │       ├── livestock.repository.ts
 │   │       └── index.ts
 │   └── application/                # Application Layer
 │       └── use-cases/              # Use cases (business operations)
-│           ├── counter/
-│           │   ├── get-counter.use-case.ts
-│           │   ├── increment-counter.use-case.ts
+│           ├── farm/
+│           │   ├── create-farm.use-case.ts
+│           │   ├── list-farms.use-case.ts
+│           │   └── index.ts
+│           ├── livestock/
+│           │   ├── add-livestock-animal.use-case.ts
+│           │   ├── create-health-record.use-case.ts
 │           │   └── index.ts
 │           └── index.ts
 ├── infrastructure/                 # Infrastructure Layer
 │   ├── repositories/               # Repository implementations
-│   │   ├── prisma-counter.repository.ts
+│   │   ├── prisma-farm.repository.ts
+│   │   ├── prisma-livestock.repository.ts
 │   │   └── index.ts
 │   └── di/                         # Dependency Injection
 │       ├── container.ts            # DI container
 │       └── index.ts
 ├── presentation/                   # Presentation Layer
 │   └── controllers/                # HTTP request handlers
-│       ├── counter.controller.ts
+│       ├── farm.controller.ts
+│       ├── livestock.controller.ts
 │       └── index.ts
 ├── routes/                         # TanStack Router routes
 ├── components/                     # React components
@@ -154,7 +162,7 @@ This ensures that:
      constructor(
        id: string,
        public readonly name: string,
-       public readonly price: number,
+       public readonly price: number
      ) {
        super(id);
      }
@@ -177,7 +185,7 @@ This ensures that:
      constructor(private productRepository: ProductRepository) {}
 
      async execute(
-       request: CreateProductRequest,
+       request: CreateProductRequest
      ): Promise<CreateProductResponse> {
        // Business logic here
      }
