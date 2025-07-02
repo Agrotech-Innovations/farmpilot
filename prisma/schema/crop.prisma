@@ -1,0 +1,94 @@
+// ======================
+// Crop Management Models
+// ======================
+
+model Crop {
+  id              String          @id @default(cuid())
+  farmId          String
+  fieldId         String?
+  
+  // Crop details
+  name            String
+  variety         String?
+  plantingDate    DateTime?
+  expectedHarvestDate DateTime?
+  actualHarvestDate DateTime?
+  
+  // Planning
+  plannedAcres    Float?
+  actualAcres     Float?
+  seedsPerAcre    Float?
+  
+  // Status
+  status          String          @default("planned") // planned, planted, growing, harvested, failed
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  field           Field?          @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  
+  // Related data
+  yields          CropYield[]
+  treatments      CropTreatment[]
+  tasks           Task[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crops")
+}
+
+model CropYield {
+  id              String          @id @default(cuid())
+  cropId          String
+  harvestDate     DateTime
+  quantity        Float
+  unit            String          @default("bushels") // bushels, tons, lbs, etc.
+  quality         String?         // grade A, B, etc.
+  marketPrice     Float?
+  
+  crop            Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crop_yields")
+}
+
+model CropTreatment {
+  id              String          @id @default(cuid())
+  cropId          String
+  treatmentType   String          // fertilizer, pesticide, herbicide, irrigation
+  product         String
+  quantity        Float
+  unit            String
+  applicationDate DateTime
+  applicationMethod String?
+  targetPestDisease String?
+  effectiveness   String?         // poor, fair, good, excellent
+  cost            Float?
+  
+  crop            Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("crop_treatments")
+}
+
+model SoilTest {
+  id              String          @id @default(cuid())
+  fieldId         String
+  testDate        DateTime
+  phLevel         Float?
+  nitrogen        Float?
+  phosphorus      Float?
+  potassium       Float?
+  organicMatter   Float?
+  recommendations String?         // Text recommendations
+  
+  field           Field           @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("soil_tests")
+} 

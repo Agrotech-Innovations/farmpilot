@@ -1,0 +1,104 @@
+// ======================
+// Livestock Management Models
+// ======================
+
+model LivestockGroup {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  species         String          // cattle, sheep, goats, pigs, chickens, etc.
+  breed           String?
+  currentCount    Int             @default(0)
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animals         LivestockAnimal[]
+  grazingRecords  GrazingRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("livestock_groups")
+}
+
+model LivestockAnimal {
+  id              String          @id @default(cuid())
+  groupId         String
+  tagNumber       String
+  name            String?
+  sex             String          // male, female
+  birthDate       DateTime?
+  breed           String?
+  motherTagNumber String?
+  fatherTagNumber String?
+  
+  // Health and status
+  currentWeight   Float?
+  healthStatus    String          @default("healthy") // healthy, sick, injured, deceased
+  
+  group           LivestockGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  healthRecords   HealthRecord[]
+  breedingRecords BreedingRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@unique([groupId, tagNumber])
+  @@map("livestock_animals")
+}
+
+model HealthRecord {
+  id              String          @id @default(cuid())
+  animalId        String
+  recordType      String          // vaccination, treatment, checkup, injury, illness
+  description     String
+  treatment       String?
+  medication      String?
+  dosage          String?
+  veterinarian    String?
+  cost            Float?
+  notes           String?
+  
+  animal          LivestockAnimal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("health_records")
+}
+
+model BreedingRecord {
+  id              String          @id @default(cuid())
+  motherAnimalId  String
+  fatherAnimalId  String?
+  breedingDate    DateTime
+  expectedBirthDate DateTime?
+  actualBirthDate DateTime?
+  pregnancyStatus String          @default("bred") // bred, confirmed, aborted, birthed
+  offspringCount  Int?
+  notes           String?
+  
+  mother          LivestockAnimal @relation(fields: [motherAnimalId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("breeding_records")
+}
+
+model GrazingRecord {
+  id              String          @id @default(cuid())
+  groupId         String
+  pastureLocation String
+  startDate       DateTime
+  endDate         DateTime?
+  animalCount     Int
+  pastureCondition String?        // excellent, good, fair, poor
+  notes           String?
+  
+  group           LivestockGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("grazing_records")
+} 

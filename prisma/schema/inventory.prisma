@@ -1,0 +1,54 @@
+// ======================
+// Inventory Management Models
+// ======================
+
+model InventoryItem {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  category        String          // seeds, fertilizers, feed, tools, harvested_produce
+  subcategory     String?
+  description     String?
+  
+  // Quantity tracking
+  currentQuantity Float           @default(0)
+  unit            String          @default("units") // kg, lbs, gallons, units, etc.
+  minimumQuantity Float?          // Alert threshold
+  
+  // Cost tracking
+  unitCost        Float?
+  totalValue      Float?
+  supplier        String?
+  
+  // Product details
+  sku             String?
+  brand           String?
+  expirationDate  DateTime?
+  storageLocation String?
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  transactions    InventoryTransaction[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("inventory_items")
+}
+
+model InventoryTransaction {
+  id              String          @id @default(cuid())
+  itemId          String
+  transactionType String          // purchase, usage, sale, adjustment, waste
+  quantity        Float
+  unitCost        Float?
+  totalCost       Float?
+  notes           String?
+  referenceNumber String?         // Invoice number, etc.
+  
+  item            InventoryItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("inventory_transactions")
+} 

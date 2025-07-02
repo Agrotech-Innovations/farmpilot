@@ -1,0 +1,47 @@
+// ======================
+// Equipment Management Models
+// ======================
+
+model Equipment {
+  id              String          @id @default(cuid())
+  farmId          String
+  name            String
+  type            String          // tractor, plow, harvester, etc.
+  brand           String?
+  model           String?
+  serialNumber    String?
+  purchaseDate    DateTime?
+  purchasePrice   Float?
+  currentValue    Float?
+  
+  // Status
+  status          String          @default("operational") // operational, maintenance, broken, retired
+  location        String?
+  
+  farm            Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  maintenanceRecords MaintenanceRecord[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("equipment")
+}
+
+model MaintenanceRecord {
+  id              String          @id @default(cuid())
+  equipmentId     String
+  maintenanceType String          // routine, repair, inspection, replacement
+  description     String
+  cost            Float?
+  performedBy     String?
+  serviceProvider String?
+  nextServiceDate DateTime?
+  notes           String?
+  
+  equipment       Equipment       @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@map("maintenance_records")
+} 

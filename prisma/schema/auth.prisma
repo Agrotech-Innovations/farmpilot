@@ -1,0 +1,84 @@
+// ======================
+// Authentication & Multi-tenancy Models
+// ======================
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  phone             String?
+  isEmailVerified   Boolean             @default(false)
+  emailVerifiedAt   DateTime?
+  lastLoginAt       DateTime?
+  
+  // Two-Factor Authentication
+  twoFactorEnabled  Boolean             @default(false)
+  twoFactorSecret   String?
+  twoFactorBackupCodes String?          // JSON array of backup codes
+  
+  // OAuth
+  oauthProviders    OAuthProvider[]
+  
+  // Multi-tenancy
+  organizationMemberships OrganizationMember[]
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@map("users")
+}
+
+model OAuthProvider {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      String    // google, github, etc.
+  providerId    String    // ID from the OAuth provider
+  accessToken   String?
+  refreshToken  String?
+  expiresAt     DateTime?
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([provider, providerId])
+  @@map("oauth_providers")
+}
+
+model Organization {
+  id              String              @id @default(cuid())
+  name            String
+  slug            String              @unique
+  description     String?
+  
+  // Subscription/billing info
+  subscriptionPlan String             @default("free") // free, basic, premium
+  subscriptionStatus String           @default("active") // active, canceled, past_due
+  
+  members         OrganizationMember[]
+  farms           Farm[]
+  
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id              String      @id @default(cuid())
+  userId          String
+  organizationId  String
+  role            String      @default("member") // owner, admin, member, viewer
+  
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@unique([userId, organizationId])
+  @@map("organization_members")
+} 
