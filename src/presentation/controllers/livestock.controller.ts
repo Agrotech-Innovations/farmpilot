@@ -93,97 +93,22 @@ const getAnalyticsSchema = z.object({
 // Server functions
 export const createLivestockGroup = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createLivestockGroupSchema.parse(data);
-    const createLivestockGroupUseCase =
-      container.get<CreateLivestockGroupUseCase>('createLivestockGroupUseCase');
+})
+  .validator((data: unknown) => {
+    return createLivestockGroupSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createLivestockGroupUseCase =
+        container.get<CreateLivestockGroupUseCase>(
+          'createLivestockGroupUseCase'
+        );
 
-    const group = await createLivestockGroupUseCase.execute(validatedData);
+      const group = await createLivestockGroupUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        id: group.id,
-        farmId: group.farmId,
-        name: group.name,
-        species: group.species,
-        breed: group.breed,
-        currentCount: group.currentCount,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create livestock group'
-    };
-  }
-});
-
-export const addLivestockAnimal = createServerFn({
-  method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = addLivestockAnimalSchema.parse(data);
-    const addLivestockAnimalUseCase = container.get<AddLivestockAnimalUseCase>(
-      'addLivestockAnimalUseCase'
-    );
-
-    const animal = await addLivestockAnimalUseCase.execute(validatedData);
-
-    return {
-      success: true,
-      data: {
-        id: animal.id,
-        groupId: animal.groupId,
-        tagNumber: animal.tagNumber,
-        name: animal.name,
-        sex: animal.sex,
-        birthDate: animal.birthDate,
-        breed: animal.breed,
-        motherTagNumber: animal.motherTagNumber,
-        fatherTagNumber: animal.fatherTagNumber,
-        currentWeight: animal.currentWeight,
-        healthStatus: animal.healthStatus,
-        age: animal.getAge(),
-        isHealthy: animal.isHealthy(),
-        createdAt: animal.createdAt,
-        updatedAt: animal.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to add livestock animal'
-    };
-  }
-});
-
-export const listLivestockGroups = createServerFn({
-  method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listGroupsByFarmSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
-
-    const groups = await livestockRepository.findGroupsByFarm(
-      validatedData.farmId
-    );
-
-    return {
-      success: true,
-      data: {
-        groups: groups.map((group: LivestockGroup) => ({
+      return {
+        success: true,
+        data: {
           id: group.id,
           farmId: group.farmId,
           name: group.name,
@@ -192,37 +117,35 @@ export const listLivestockGroups = createServerFn({
           currentCount: group.currentCount,
           createdAt: group.createdAt,
           updatedAt: group.updatedAt
-        }))
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to list livestock groups'
-    };
-  }
-});
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create livestock group'
+      };
+    }
+  });
 
-export const listLivestockAnimals = createServerFn({
-  method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listAnimalsByGroupSchema.parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
+export const addLivestockAnimal = createServerFn({
+  method: 'POST'
+})
+  .validator((data: unknown) => {
+    return addLivestockAnimalSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const addLivestockAnimalUseCase =
+        container.get<AddLivestockAnimalUseCase>('addLivestockAnimalUseCase');
 
-    const animals = await livestockRepository.findAnimalsByGroup(
-      validatedData.groupId
-    );
+      const animal = await addLivestockAnimalUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        animals: animals.map((animal: LivestockAnimal) => ({
+      return {
+        success: true,
+        data: {
           id: animal.id,
           groupId: animal.groupId,
           tagNumber: animal.tagNumber,
@@ -238,39 +161,79 @@ export const listLivestockAnimals = createServerFn({
           isHealthy: animal.isHealthy(),
           createdAt: animal.createdAt,
           updatedAt: animal.updatedAt
-        }))
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to list livestock animals'
-    };
-  }
-});
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to add livestock animal'
+      };
+    }
+  });
 
-export const listAnimalsByFarm = createServerFn({
+export const listLivestockGroups = createServerFn({
   method: 'GET'
 })
-  .validator((farmId: string) => farmId)
+  .validator((data: unknown) => {
+    return listGroupsByFarmSchema.parse(data);
+  })
   .handler(async ({data}) => {
     try {
-      const validatedData = listAnimalsByFarmSchema.parse(data);
-      const listAnimalsByFarmUseCase = container.get<ListAnimalsByFarmUseCase>(
-        'listAnimalsByFarmUseCase'
+      const livestockRepository = container.get<LivestockRepository>(
+        'livestockRepository'
       );
 
-      const result = await listAnimalsByFarmUseCase.execute({
-        farmId: validatedData.farmId
-      });
+      const groups = await livestockRepository.findGroupsByFarm(data.farmId);
 
       return {
         success: true,
         data: {
-          animals: result.animals.map((animal: LivestockAnimal) => ({
+          groups: groups.map((group: LivestockGroup) => ({
+            id: group.id,
+            farmId: group.farmId,
+            name: group.name,
+            species: group.species,
+            breed: group.breed,
+            currentCount: group.currentCount,
+            createdAt: group.createdAt,
+            updatedAt: group.updatedAt
+          }))
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to list livestock groups'
+      };
+    }
+  });
+
+export const listLivestockAnimals = createServerFn({
+  method: 'GET'
+})
+  .validator((data: unknown) => {
+    return listAnimalsByGroupSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const livestockRepository = container.get<LivestockRepository>(
+        'livestockRepository'
+      );
+
+      const animals = await livestockRepository.findAnimalsByGroup(
+        data.groupId
+      );
+
+      return {
+        success: true,
+        data: {
+          animals: animals.map((animal: LivestockAnimal) => ({
             id: animal.id,
             groupId: animal.groupId,
             tagNumber: animal.tagNumber,
@@ -295,302 +258,366 @@ export const listAnimalsByFarm = createServerFn({
         error:
           error instanceof Error
             ? error.message
-            : 'Failed to list animals by farm'
+            : 'Failed to list livestock animals'
       };
     }
   });
 
+export const listAnimalsByFarm = createServerFn({
+  method: 'GET'
+})
+  .validator((farmId: string) => {
+    return listAnimalsByFarmSchema.parse({farmId: farmId});
+  })
+  .handler(async ({data}) => {
+    const listAnimalsByFarmUseCase = container.get<ListAnimalsByFarmUseCase>(
+      'listAnimalsByFarmUseCase'
+    );
+
+    return await listAnimalsByFarmUseCase
+      .execute({
+        farmId: data.farmId
+      })
+      .then((result) => {
+        return {
+          animals: result.animals.map((animal: LivestockAnimal) => ({
+            id: animal.id,
+            groupId: animal.groupId,
+            tagNumber: animal.tagNumber,
+            name: animal.name,
+            sex: animal.sex,
+            birthDate: animal.birthDate,
+            breed: animal.breed,
+            motherTagNumber: animal.motherTagNumber,
+            fatherTagNumber: animal.fatherTagNumber,
+            currentWeight: animal.currentWeight,
+            healthStatus: animal.healthStatus,
+            age: animal.getAge(),
+            isHealthy: animal.isHealthy(),
+            createdAt: animal.createdAt,
+            updatedAt: animal.updatedAt
+          }))
+        };
+      })
+      .catch((error) => {
+        throw new Error('Failed to list animals by farm');
+      });
+  });
+
 export const updateAnimalHealth = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = updateAnimalHealthSchema.parse(data);
-    const updateAnimalHealthStatusUseCase =
-      container.get<UpdateAnimalHealthStatusUseCase>(
-        'updateAnimalHealthStatusUseCase'
-      );
+})
+  .validator((data: unknown) => {
+    return updateAnimalHealthSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateAnimalHealthStatusUseCase =
+        container.get<UpdateAnimalHealthStatusUseCase>(
+          'updateAnimalHealthStatusUseCase'
+        );
 
-    const updatedAnimal = await updateAnimalHealthStatusUseCase.execute({
-      animalId: validatedData.animalId,
-      healthStatus: validatedData.healthStatus
-    });
+      const updatedAnimal = await updateAnimalHealthStatusUseCase.execute({
+        animalId: data.animalId,
+        healthStatus: data.healthStatus
+      });
 
-    return {
-      success: true,
-      data: {
-        id: updatedAnimal.id,
-        groupId: updatedAnimal.groupId,
-        tagNumber: updatedAnimal.tagNumber,
-        name: updatedAnimal.name,
-        sex: updatedAnimal.sex,
-        birthDate: updatedAnimal.birthDate,
-        breed: updatedAnimal.breed,
-        motherTagNumber: updatedAnimal.motherTagNumber,
-        fatherTagNumber: updatedAnimal.fatherTagNumber,
-        currentWeight: updatedAnimal.currentWeight,
-        healthStatus: updatedAnimal.healthStatus,
-        age: updatedAnimal.getAge(),
-        isHealthy: updatedAnimal.isHealthy(),
-        createdAt: updatedAnimal.createdAt,
-        updatedAt: updatedAnimal.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update animal health status'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          id: updatedAnimal.id,
+          groupId: updatedAnimal.groupId,
+          tagNumber: updatedAnimal.tagNumber,
+          name: updatedAnimal.name,
+          sex: updatedAnimal.sex,
+          birthDate: updatedAnimal.birthDate,
+          breed: updatedAnimal.breed,
+          motherTagNumber: updatedAnimal.motherTagNumber,
+          fatherTagNumber: updatedAnimal.fatherTagNumber,
+          currentWeight: updatedAnimal.currentWeight,
+          healthStatus: updatedAnimal.healthStatus,
+          age: updatedAnimal.getAge(),
+          isHealthy: updatedAnimal.isHealthy(),
+          createdAt: updatedAnimal.createdAt,
+          updatedAt: updatedAnimal.updatedAt
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update animal health status'
+      };
+    }
+  });
 
 export const updateAnimalWeight = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = updateAnimalWeightSchema.parse(data);
-    const updateAnimalWeightUseCase = container.get<UpdateAnimalWeightUseCase>(
-      'updateAnimalWeightUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return updateAnimalWeightSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateAnimalWeightUseCase =
+        container.get<UpdateAnimalWeightUseCase>('updateAnimalWeightUseCase');
 
-    const result = await updateAnimalWeightUseCase.execute({
-      animalId: validatedData.animalId,
-      weight: validatedData.weight,
-      createHealthRecord: true
-    });
+      const result = await updateAnimalWeightUseCase.execute({
+        animalId: data.animalId,
+        weight: data.weight,
+        createHealthRecord: true
+      });
 
-    return {
-      success: true,
-      data: {
-        id: result.updatedAnimal.id,
-        groupId: result.updatedAnimal.groupId,
-        tagNumber: result.updatedAnimal.tagNumber,
-        name: result.updatedAnimal.name,
-        sex: result.updatedAnimal.sex,
-        birthDate: result.updatedAnimal.birthDate,
-        breed: result.updatedAnimal.breed,
-        motherTagNumber: result.updatedAnimal.motherTagNumber,
-        fatherTagNumber: result.updatedAnimal.fatherTagNumber,
-        currentWeight: result.updatedAnimal.currentWeight,
-        healthStatus: result.updatedAnimal.healthStatus,
-        age: result.updatedAnimal.getAge(),
-        isHealthy: result.updatedAnimal.isHealthy(),
-        createdAt: result.updatedAnimal.createdAt,
-        updatedAt: result.updatedAnimal.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update animal weight'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          id: result.updatedAnimal.id,
+          groupId: result.updatedAnimal.groupId,
+          tagNumber: result.updatedAnimal.tagNumber,
+          name: result.updatedAnimal.name,
+          sex: result.updatedAnimal.sex,
+          birthDate: result.updatedAnimal.birthDate,
+          breed: result.updatedAnimal.breed,
+          motherTagNumber: result.updatedAnimal.motherTagNumber,
+          fatherTagNumber: result.updatedAnimal.fatherTagNumber,
+          currentWeight: result.updatedAnimal.currentWeight,
+          healthStatus: result.updatedAnimal.healthStatus,
+          age: result.updatedAnimal.getAge(),
+          isHealthy: result.updatedAnimal.isHealthy(),
+          createdAt: result.updatedAnimal.createdAt,
+          updatedAt: result.updatedAnimal.updatedAt
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update animal weight'
+      };
+    }
+  });
 
 export const createHealthRecord = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createHealthRecordSchema.parse(data);
-    const createHealthRecordUseCase = container.get<CreateHealthRecordUseCase>(
-      'createHealthRecordUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return createHealthRecordSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createHealthRecordUseCase =
+        container.get<CreateHealthRecordUseCase>('createHealthRecordUseCase');
 
-    const healthRecord = await createHealthRecordUseCase.execute({
-      animalId: validatedData.animalId,
-      recordType: validatedData.recordType,
-      description: validatedData.description,
-      treatment: validatedData.treatment,
-      medication: validatedData.medication,
-      dosage: validatedData.dosage,
-      veterinarian: validatedData.veterinarian,
-      cost: validatedData.cost,
-      notes: validatedData.notes
-    });
+      const healthRecord = await createHealthRecordUseCase.execute({
+        animalId: data.animalId,
+        recordType: data.recordType,
+        description: data.description,
+        treatment: data.treatment,
+        medication: data.medication,
+        dosage: data.dosage,
+        veterinarian: data.veterinarian,
+        cost: data.cost,
+        notes: data.notes
+      });
 
-    return {
-      success: true,
-      data: {
-        id: healthRecord.id,
-        animalId: healthRecord.animalId,
-        recordType: healthRecord.recordType,
-        description: healthRecord.description,
-        treatment: healthRecord.treatment,
-        medication: healthRecord.medication,
-        dosage: healthRecord.dosage,
-        veterinarian: healthRecord.veterinarian,
-        cost: healthRecord.cost,
-        notes: healthRecord.notes,
-        createdAt: healthRecord.createdAt,
-        updatedAt: healthRecord.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create health record'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          id: healthRecord.id,
+          animalId: healthRecord.animalId,
+          recordType: healthRecord.recordType,
+          description: healthRecord.description,
+          treatment: healthRecord.treatment,
+          medication: healthRecord.medication,
+          dosage: healthRecord.dosage,
+          veterinarian: healthRecord.veterinarian,
+          cost: healthRecord.cost,
+          notes: healthRecord.notes,
+          createdAt: healthRecord.createdAt,
+          updatedAt: healthRecord.updatedAt
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create health record'
+      };
+    }
+  });
 
 export const getHealthRecords = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getHealthRecordsSchema.parse(data);
-    const getHealthRecordsUseCase = container.get<GetHealthRecordsUseCase>(
-      'getHealthRecordsUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return getHealthRecordsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getHealthRecordsUseCase = container.get<GetHealthRecordsUseCase>(
+        'getHealthRecordsUseCase'
+      );
 
-    const result = await getHealthRecordsUseCase.execute({
-      animalId: validatedData.animalId
-    });
+      const result = await getHealthRecordsUseCase.execute({
+        animalId: data.animalId
+      });
 
-    return {
-      success: true,
-      data: {
-        records: result.records.map((record: HealthRecord) => ({
-          id: record.id,
-          animalId: record.animalId,
-          recordType: record.recordType,
-          description: record.description,
-          treatment: record.treatment,
-          medication: record.medication,
-          dosage: record.dosage,
-          veterinarian: record.veterinarian,
-          cost: record.cost,
-          notes: record.notes,
-          createdAt: record.createdAt,
-          updatedAt: record.updatedAt
-        }))
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to get health records'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          records: result.records.map((record: HealthRecord) => ({
+            id: record.id,
+            animalId: record.animalId,
+            recordType: record.recordType,
+            description: record.description,
+            treatment: record.treatment,
+            medication: record.medication,
+            dosage: record.dosage,
+            veterinarian: record.veterinarian,
+            cost: record.cost,
+            notes: record.notes,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt
+          }))
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get health records'
+      };
+    }
+  });
 
 export const getLivestockAnalytics = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getAnalyticsSchema.parse(data);
-    const getLivestockHealthAnalyticsUseCase =
-      container.get<GetLivestockHealthAnalyticsUseCase>(
-        'getLivestockHealthAnalyticsUseCase'
-      );
+})
+  .validator((data: unknown) => {
+    return getAnalyticsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getLivestockHealthAnalyticsUseCase =
+        container.get<GetLivestockHealthAnalyticsUseCase>(
+          'getLivestockHealthAnalyticsUseCase'
+        );
 
-    const analytics = await getLivestockHealthAnalyticsUseCase.execute({
-      farmId: validatedData.farmId,
-      daysAhead: 30
-    });
+      const analytics = await getLivestockHealthAnalyticsUseCase.execute({
+        farmId: data.farmId,
+        daysAhead: 30
+      });
 
-    return {
-      success: true,
-      data: analytics
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get livestock analytics'
-    };
-  }
-});
+      return {
+        success: true,
+        data: analytics
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get livestock analytics'
+      };
+    }
+  });
 
 export const deleteLivestockGroup = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const {groupId} = z.object({groupId: z.string().min(1)}).parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
-
-    // Check if group has animals
-    const animals = await livestockRepository.findAnimalsByGroup(groupId);
-    if (animals.length > 0) {
-      throw new Error(
-        'Cannot delete group with animals. Please remove all animals first.'
+})
+  .validator((data: unknown) => {
+    return z.object({groupId: z.string().min(1)}).parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const livestockRepository = container.get<LivestockRepository>(
+        'livestockRepository'
       );
+
+      // Check if group has animals
+      const animals = await livestockRepository.findAnimalsByGroup(
+        data.groupId
+      );
+      if (animals.length > 0) {
+        throw new Error(
+          'Cannot delete group with animals. Please remove all animals first.'
+        );
+      }
+
+      await livestockRepository.deleteGroup(data.groupId);
+
+      return {
+        success: true,
+        message: 'Livestock group deleted successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete livestock group'
+      };
     }
-
-    await livestockRepository.deleteGroup(groupId);
-
-    return {
-      success: true,
-      message: 'Livestock group deleted successfully'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete livestock group'
-    };
-  }
-});
+  });
 
 export const deleteLivestockAnimal = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const {animalId} = z.object({animalId: z.string().min(1)}).parse(data);
-    const livestockRepository = container.get<LivestockRepository>(
-      'livestockRepository'
-    );
+})
+  .validator((data: unknown) => {
+    return z.object({animalId: z.string().min(1)}).parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const livestockRepository = container.get<LivestockRepository>(
+        'livestockRepository'
+      );
 
-    // Get animal to update group count
-    const animal = await livestockRepository.findAnimalById(animalId);
-    if (!animal) {
-      throw new Error('Animal not found');
+      // Get animal to update group count
+      const animal = await livestockRepository.findAnimalById(data.animalId);
+      if (!animal) {
+        throw new Error('Animal not found');
+      }
+
+      // Delete the animal
+      await livestockRepository.deleteAnimal(data.animalId);
+
+      // Update group count
+      const group = await livestockRepository.findGroupById(animal.groupId);
+      if (group && group.currentCount > 0) {
+        const updatedGroup = group.updateCount(group.currentCount - 1);
+        await livestockRepository.saveGroup(updatedGroup);
+      }
+
+      return {
+        success: true,
+        message: 'Livestock animal deleted successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete livestock animal'
+      };
     }
-
-    // Delete the animal
-    await livestockRepository.deleteAnimal(animalId);
-
-    // Update group count
-    const group = await livestockRepository.findGroupById(animal.groupId);
-    if (group && group.currentCount > 0) {
-      const updatedGroup = group.updateCount(group.currentCount - 1);
-      await livestockRepository.saveGroup(updatedGroup);
-    }
-
-    return {
-      success: true,
-      message: 'Livestock animal deleted successfully'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete livestock animal'
-    };
-  }
-});
+  });
 
 export const scheduleVaccination = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         animalId: z.string().min(1),
         vaccinationType: z.string().min(1),
@@ -604,51 +631,53 @@ export const scheduleVaccination = createServerFn({
         notes: z.string().optional()
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const scheduleVaccinationUseCase = container.get<
+        import('@/core/application/use-cases/livestock').ScheduleVaccinationUseCase
+      >('scheduleVaccinationUseCase');
 
-    const scheduleVaccinationUseCase = container.get<
-      import('@/core/application/use-cases/livestock').ScheduleVaccinationUseCase
-    >('scheduleVaccinationUseCase');
+      const vaccinationRecord = await scheduleVaccinationUseCase.execute({
+        animalId: data.animalId,
+        vaccinationType: data.vaccinationType,
+        description: data.description,
+        scheduledDate: data.scheduledDate,
+        veterinarian: data.veterinarian,
+        cost: data.cost,
+        notes: data.notes
+      });
 
-    const vaccinationRecord = await scheduleVaccinationUseCase.execute({
-      animalId: validatedData.animalId,
-      vaccinationType: validatedData.vaccinationType,
-      description: validatedData.description,
-      scheduledDate: validatedData.scheduledDate,
-      veterinarian: validatedData.veterinarian,
-      cost: validatedData.cost,
-      notes: validatedData.notes
-    });
-
-    return {
-      success: true,
-      data: {
-        id: vaccinationRecord.id,
-        animalId: vaccinationRecord.animalId,
-        recordType: vaccinationRecord.recordType,
-        description: vaccinationRecord.description,
-        veterinarian: vaccinationRecord.veterinarian,
-        cost: vaccinationRecord.cost,
-        notes: vaccinationRecord.notes,
-        createdAt: vaccinationRecord.createdAt,
-        updatedAt: vaccinationRecord.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to schedule vaccination'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          id: vaccinationRecord.id,
+          animalId: vaccinationRecord.animalId,
+          recordType: vaccinationRecord.recordType,
+          description: vaccinationRecord.description,
+          veterinarian: vaccinationRecord.veterinarian,
+          cost: vaccinationRecord.cost,
+          notes: vaccinationRecord.notes,
+          createdAt: vaccinationRecord.createdAt,
+          updatedAt: vaccinationRecord.updatedAt
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to schedule vaccination'
+      };
+    }
+  });
 
 export const recordTreatment = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         animalId: z.string().min(1),
         description: z.string().min(1),
@@ -664,66 +693,68 @@ export const recordTreatment = createServerFn({
           .optional()
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const recordTreatmentUseCase = container.get<
+        import('@/core/application/use-cases/livestock').RecordTreatmentUseCase
+      >('recordTreatmentUseCase');
 
-    const recordTreatmentUseCase = container.get<
-      import('@/core/application/use-cases/livestock').RecordTreatmentUseCase
-    >('recordTreatmentUseCase');
+      const result = await recordTreatmentUseCase.execute({
+        animalId: data.animalId,
+        description: data.description,
+        treatment: data.treatment,
+        medication: data.medication,
+        dosage: data.dosage,
+        veterinarian: data.veterinarian,
+        cost: data.cost,
+        notes: data.notes,
+        updateHealthStatus: data.updateHealthStatus,
+        newHealthStatus: data.newHealthStatus
+      });
 
-    const result = await recordTreatmentUseCase.execute({
-      animalId: validatedData.animalId,
-      description: validatedData.description,
-      treatment: validatedData.treatment,
-      medication: validatedData.medication,
-      dosage: validatedData.dosage,
-      veterinarian: validatedData.veterinarian,
-      cost: validatedData.cost,
-      notes: validatedData.notes,
-      updateHealthStatus: validatedData.updateHealthStatus,
-      newHealthStatus: validatedData.newHealthStatus
-    });
-
-    return {
-      success: true,
-      data: {
-        healthRecord: {
-          id: result.healthRecord.id,
-          animalId: result.healthRecord.animalId,
-          recordType: result.healthRecord.recordType,
-          description: result.healthRecord.description,
-          treatment: result.healthRecord.treatment,
-          medication: result.healthRecord.medication,
-          dosage: result.healthRecord.dosage,
-          veterinarian: result.healthRecord.veterinarian,
-          cost: result.healthRecord.cost,
-          notes: result.healthRecord.notes,
-          createdAt: result.healthRecord.createdAt,
-          updatedAt: result.healthRecord.updatedAt
-        },
-        updatedAnimal: result.updatedAnimal
-          ? {
-              id: result.updatedAnimal.id,
-              tagNumber: result.updatedAnimal.tagNumber,
-              name: result.updatedAnimal.name,
-              healthStatus: result.updatedAnimal.healthStatus,
-              groupId: result.updatedAnimal.groupId
-            }
-          : undefined
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to record treatment'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          healthRecord: {
+            id: result.healthRecord.id,
+            animalId: result.healthRecord.animalId,
+            recordType: result.healthRecord.recordType,
+            description: result.healthRecord.description,
+            treatment: result.healthRecord.treatment,
+            medication: result.healthRecord.medication,
+            dosage: result.healthRecord.dosage,
+            veterinarian: result.healthRecord.veterinarian,
+            cost: result.healthRecord.cost,
+            notes: result.healthRecord.notes,
+            createdAt: result.healthRecord.createdAt,
+            updatedAt: result.healthRecord.updatedAt
+          },
+          updatedAnimal: result.updatedAnimal
+            ? {
+                id: result.updatedAnimal.id,
+                tagNumber: result.updatedAnimal.tagNumber,
+                name: result.updatedAnimal.name,
+                healthStatus: result.updatedAnimal.healthStatus,
+                groupId: result.updatedAnimal.groupId
+              }
+            : undefined
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to record treatment'
+      };
+    }
+  });
 
 export const getAnimalHealthHistory = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         animalId: z.string().min(1),
         recordType: z
@@ -739,55 +770,57 @@ export const getAnimalHealthHistory = createServerFn({
           .transform((val) => (val ? new Date(val) : undefined))
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getAnimalHealthHistoryUseCase = container.get<
+        import('@/core/application/use-cases/livestock').GetAnimalHealthHistoryUseCase
+      >('getAnimalHealthHistoryUseCase');
 
-    const getAnimalHealthHistoryUseCase = container.get<
-      import('@/core/application/use-cases/livestock').GetAnimalHealthHistoryUseCase
-    >('getAnimalHealthHistoryUseCase');
+      const history = await getAnimalHealthHistoryUseCase.execute({
+        animalId: data.animalId,
+        recordType: data.recordType,
+        startDate: data.startDate,
+        endDate: data.endDate
+      });
 
-    const history = await getAnimalHealthHistoryUseCase.execute({
-      animalId: validatedData.animalId,
-      recordType: validatedData.recordType,
-      startDate: validatedData.startDate,
-      endDate: validatedData.endDate
-    });
-
-    return {
-      success: true,
-      data: {
-        animal: history.animal,
-        healthRecords: history.healthRecords.map((record) => ({
-          id: record.id,
-          animalId: record.animalId,
-          recordType: record.recordType,
-          description: record.description,
-          treatment: record.treatment,
-          medication: record.medication,
-          dosage: record.dosage,
-          veterinarian: record.veterinarian,
-          cost: record.cost,
-          notes: record.notes,
-          createdAt: record.createdAt,
-          updatedAt: record.updatedAt
-        })),
-        summary: history.summary
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get animal health history'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          animal: history.animal,
+          healthRecords: history.healthRecords.map((record) => ({
+            id: record.id,
+            animalId: record.animalId,
+            recordType: record.recordType,
+            description: record.description,
+            treatment: record.treatment,
+            medication: record.medication,
+            dosage: record.dosage,
+            veterinarian: record.veterinarian,
+            cost: record.cost,
+            notes: record.notes,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt
+          })),
+          summary: history.summary
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get animal health history'
+      };
+    }
+  });
 
 export const createVaccinationSchedule = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         animalIds: z.array(z.string().min(1)).optional(),
         groupId: z.string().min(1).optional(),
@@ -808,52 +841,54 @@ export const createVaccinationSchedule = createServerFn({
         message: 'Either animalIds or groupId must be provided'
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createVaccinationScheduleUseCase = container.get<
+        import('@/core/application/use-cases/livestock').CreateVaccinationScheduleUseCase
+      >('createVaccinationScheduleUseCase');
 
-    const createVaccinationScheduleUseCase = container.get<
-      import('@/core/application/use-cases/livestock').CreateVaccinationScheduleUseCase
-    >('createVaccinationScheduleUseCase');
+      const result = await createVaccinationScheduleUseCase.execute({
+        animalIds: data.animalIds || [],
+        groupId: data.groupId,
+        scheduleItems: data.scheduleItems,
+        autoScheduleNext: data.autoScheduleNext
+      });
 
-    const result = await createVaccinationScheduleUseCase.execute({
-      animalIds: validatedData.animalIds || [],
-      groupId: validatedData.groupId,
-      scheduleItems: validatedData.scheduleItems,
-      autoScheduleNext: validatedData.autoScheduleNext
-    });
-
-    return {
-      success: true,
-      data: {
-        scheduledVaccinations: result.scheduledVaccinations.map((record) => ({
-          id: record.id,
-          animalId: record.animalId,
-          recordType: record.recordType,
-          description: record.description,
-          veterinarian: record.veterinarian,
-          cost: record.cost,
-          notes: record.notes,
-          createdAt: record.createdAt,
-          updatedAt: record.updatedAt
-        })),
-        totalAnimalsScheduled: result.totalAnimalsScheduled,
-        nextScheduledDates: result.nextScheduledDates
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create vaccination schedule'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          scheduledVaccinations: result.scheduledVaccinations.map((record) => ({
+            id: record.id,
+            animalId: record.animalId,
+            recordType: record.recordType,
+            description: record.description,
+            veterinarian: record.veterinarian,
+            cost: record.cost,
+            notes: record.notes,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt
+          })),
+          totalAnimalsScheduled: result.totalAnimalsScheduled,
+          nextScheduledDates: result.nextScheduledDates
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create vaccination schedule'
+      };
+    }
+  });
 
 export const getVaccinationSchedule = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         animalId: z.string().min(1).optional(),
         groupId: z.string().min(1).optional(),
@@ -866,33 +901,35 @@ export const getVaccinationSchedule = createServerFn({
         message: 'Either animalId, groupId, or farmId must be provided'
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getVaccinationScheduleUseCase = container.get<
+        import('@/core/application/use-cases/livestock').GetVaccinationScheduleUseCase
+      >('getVaccinationScheduleUseCase');
 
-    const getVaccinationScheduleUseCase = container.get<
-      import('@/core/application/use-cases/livestock').GetVaccinationScheduleUseCase
-    >('getVaccinationScheduleUseCase');
+      const result = await getVaccinationScheduleUseCase.execute(data);
 
-    const result = await getVaccinationScheduleUseCase.execute(validatedData);
-
-    return {
-      success: true,
-      data: result
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get vaccination schedule'
-    };
-  }
-});
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get vaccination schedule'
+      };
+    }
+  });
 
 export const updateVaccinationStatus = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         vaccinationRecordId: z.string().min(1),
         status: z.enum(['completed', 'rescheduled', 'cancelled']),
@@ -911,58 +948,60 @@ export const updateVaccinationStatus = createServerFn({
         nextVaccinationIntervalDays: z.number().min(1).optional()
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateVaccinationStatusUseCase = container.get<
+        import('@/core/application/use-cases/livestock').UpdateVaccinationStatusUseCase
+      >('updateVaccinationStatusUseCase');
 
-    const updateVaccinationStatusUseCase = container.get<
-      import('@/core/application/use-cases/livestock').UpdateVaccinationStatusUseCase
-    >('updateVaccinationStatusUseCase');
+      const result = await updateVaccinationStatusUseCase.execute(data);
 
-    const result = await updateVaccinationStatusUseCase.execute(validatedData);
-
-    return {
-      success: true,
-      data: {
-        updatedRecord: {
-          id: result.updatedRecord.id,
-          animalId: result.updatedRecord.animalId,
-          recordType: result.updatedRecord.recordType,
-          description: result.updatedRecord.description,
-          veterinarian: result.updatedRecord.veterinarian,
-          cost: result.updatedRecord.cost,
-          notes: result.updatedRecord.notes,
-          createdAt: result.updatedRecord.createdAt,
-          updatedAt: result.updatedRecord.updatedAt
-        },
-        nextVaccinationRecord: result.nextVaccinationRecord
-          ? {
-              id: result.nextVaccinationRecord.id,
-              animalId: result.nextVaccinationRecord.animalId,
-              recordType: result.nextVaccinationRecord.recordType,
-              description: result.nextVaccinationRecord.description,
-              veterinarian: result.nextVaccinationRecord.veterinarian,
-              cost: result.nextVaccinationRecord.cost,
-              notes: result.nextVaccinationRecord.notes,
-              createdAt: result.nextVaccinationRecord.createdAt,
-              updatedAt: result.nextVaccinationRecord.updatedAt
-            }
-          : undefined
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update vaccination status'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          updatedRecord: {
+            id: result.updatedRecord.id,
+            animalId: result.updatedRecord.animalId,
+            recordType: result.updatedRecord.recordType,
+            description: result.updatedRecord.description,
+            veterinarian: result.updatedRecord.veterinarian,
+            cost: result.updatedRecord.cost,
+            notes: result.updatedRecord.notes,
+            createdAt: result.updatedRecord.createdAt,
+            updatedAt: result.updatedRecord.updatedAt
+          },
+          nextVaccinationRecord: result.nextVaccinationRecord
+            ? {
+                id: result.nextVaccinationRecord.id,
+                animalId: result.nextVaccinationRecord.animalId,
+                recordType: result.nextVaccinationRecord.recordType,
+                description: result.nextVaccinationRecord.description,
+                veterinarian: result.nextVaccinationRecord.veterinarian,
+                cost: result.nextVaccinationRecord.cost,
+                notes: result.nextVaccinationRecord.notes,
+                createdAt: result.nextVaccinationRecord.createdAt,
+                updatedAt: result.nextVaccinationRecord.updatedAt
+              }
+            : undefined
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update vaccination status'
+      };
+    }
+  });
 
 export const getVaccinationReminders = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         farmId: z.string().min(1),
         daysAhead: z.number().min(1).optional(),
@@ -971,33 +1010,35 @@ export const getVaccinationReminders = createServerFn({
         priorityLevel: z.enum(['high', 'medium', 'low', 'all']).optional()
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getVaccinationRemindersUseCase = container.get<
+        import('@/core/application/use-cases/livestock').GetVaccinationRemindersUseCase
+      >('getVaccinationRemindersUseCase');
 
-    const getVaccinationRemindersUseCase = container.get<
-      import('@/core/application/use-cases/livestock').GetVaccinationRemindersUseCase
-    >('getVaccinationRemindersUseCase');
+      const result = await getVaccinationRemindersUseCase.execute(data);
 
-    const result = await getVaccinationRemindersUseCase.execute(validatedData);
-
-    return {
-      success: true,
-      data: result
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get vaccination reminders'
-    };
-  }
-});
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get vaccination reminders'
+      };
+    }
+  });
 
 export const bulkScheduleVaccinations = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         farmId: z.string().min(1).optional(),
         groupIds: z.array(z.string().min(1)).optional(),
@@ -1030,52 +1071,54 @@ export const bulkScheduleVaccinations = createServerFn({
         message: 'Either farmId, groupIds, or animalIds must be provided'
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const bulkScheduleVaccinationsUseCase = container.get<
+        import('@/core/application/use-cases/livestock').BulkScheduleVaccinationsUseCase
+      >('bulkScheduleVaccinationsUseCase');
 
-    const bulkScheduleVaccinationsUseCase = container.get<
-      import('@/core/application/use-cases/livestock').BulkScheduleVaccinationsUseCase
-    >('bulkScheduleVaccinationsUseCase');
+      const result = await bulkScheduleVaccinationsUseCase.execute(data);
 
-    const result = await bulkScheduleVaccinationsUseCase.execute(validatedData);
-
-    return {
-      success: true,
-      data: {
-        results: result.results.map((item) => ({
-          animalId: item.animalId,
-          animalTagNumber: item.animalTagNumber,
-          animalName: item.animalName,
-          groupId: item.groupId,
-          scheduledVaccinations: item.scheduledVaccinations.map((record) => ({
-            id: record.id,
-            animalId: record.animalId,
-            recordType: record.recordType,
-            description: record.description,
-            treatment: record.treatment,
-            medication: record.medication,
-            dosage: record.dosage,
-            veterinarian: record.veterinarian,
-            cost: record.cost,
-            notes: record.notes,
-            createdAt: record.createdAt,
-            updatedAt: record.updatedAt
+      return {
+        success: true,
+        data: {
+          results: result.results.map((item) => ({
+            animalId: item.animalId,
+            animalTagNumber: item.animalTagNumber,
+            animalName: item.animalName,
+            groupId: item.groupId,
+            scheduledVaccinations: item.scheduledVaccinations.map((record) => ({
+              id: record.id,
+              animalId: record.animalId,
+              recordType: record.recordType,
+              description: record.description,
+              treatment: record.treatment,
+              medication: record.medication,
+              dosage: record.dosage,
+              veterinarian: record.veterinarian,
+              cost: record.cost,
+              notes: record.notes,
+              createdAt: record.createdAt,
+              updatedAt: record.updatedAt
+            })),
+            skippedVaccinations: item.skippedVaccinations,
+            errors: item.errors
           })),
-          skippedVaccinations: item.skippedVaccinations,
-          errors: item.errors
-        })),
-        totalAnimalsProcessed: result.totalAnimalsProcessed,
-        totalVaccinationsScheduled: result.totalVaccinationsScheduled,
-        totalSkipped: result.totalSkipped,
-        totalErrors: result.totalErrors,
-        summary: result.summary
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to bulk schedule vaccinations'
-    };
-  }
-});
+          totalAnimalsProcessed: result.totalAnimalsProcessed,
+          totalVaccinationsScheduled: result.totalVaccinationsScheduled,
+          totalSkipped: result.totalSkipped,
+          totalErrors: result.totalErrors,
+          summary: result.summary
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to bulk schedule vaccinations'
+      };
+    }
+  });
