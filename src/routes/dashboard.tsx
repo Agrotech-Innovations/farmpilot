@@ -1,5 +1,7 @@
 import {createFileRoute} from '@tanstack/react-router';
+import {useState, useEffect} from 'react';
 import {Button} from '@/components/ui/button';
+import {listAnimalsByFarm} from '@/presentation/controllers/livestock.controller';
 import {
   Card,
   CardContent,
@@ -31,6 +33,38 @@ export const Route = createFileRoute('/dashboard')({
 });
 
 function DashboardPage() {
+  // State for animals data
+  const [animals, setAnimals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch animals data from server
+  useEffect(() => {
+    const fetchAnimals = async () => {
+      try {
+        setLoading(true);
+
+        // For now, using a mock farm ID - in a real app this would come from user context
+        const mockFarmId = 'farm-1';
+        const result = await listAnimalsByFarm({data: mockFarmId});
+
+        if (result.success && result.data) {
+          setAnimals(result.data.animals);
+        } else {
+          setError(result.error || 'Failed to load animals');
+        }
+
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load animals');
+        console.error('Error fetching animals:', err);
+        setLoading(false);
+      }
+    };
+
+    fetchAnimals();
+  }, []);
+
   // Mock data - in real app this would come from server functions
   const mockCrops = [
     {
@@ -61,31 +95,6 @@ function DashboardPage() {
     {id: '3', name: 'South Field', acres: 20, soilType: 'Sandy'}
   ];
 
-  const mockAnimals = [
-    {
-      id: '1',
-      tagNumber: 'C001',
-      name: 'Bessie',
-      species: 'Cattle',
-      breed: 'Holstein',
-      age: 3,
-      healthStatus: 'healthy' as const,
-      lastCheckup: new Date('2024-01-01'),
-      nextVaccination: new Date('2024-02-15'),
-      weight: 1200
-    },
-    {
-      id: '2',
-      tagNumber: 'C002',
-      species: 'Cattle',
-      breed: 'Angus',
-      age: 2,
-      healthStatus: 'sick' as const,
-      lastCheckup: new Date('2024-01-10'),
-      weight: 950
-    }
-  ];
-
   const mockHealthRecords = [
     {
       id: '1',
@@ -97,6 +106,32 @@ function DashboardPage() {
       cost: 75
     }
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-accent to-secondary p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-semibold text-foreground">
+            Loading farm data...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-accent to-secondary p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-semibold text-destructive">
+            Error: {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-secondary p-6">
@@ -449,7 +484,7 @@ function DashboardPage() {
 
           <TabsContent value="livestock">
             <LivestockHealthDashboard
-              animals={mockAnimals}
+              animals={animals}
               healthRecords={mockHealthRecords}
               onScheduleTreatment={(animalId) =>
                 console.log('Schedule treatment:', animalId)

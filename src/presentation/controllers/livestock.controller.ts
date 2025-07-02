@@ -3,6 +3,7 @@ import {container} from '@/infrastructure/di/container';
 import {
   CreateLivestockGroupUseCase,
   AddLivestockAnimalUseCase,
+  ListAnimalsByFarmUseCase,
   CreateHealthRecordUseCase,
   GetHealthRecordsUseCase,
   UpdateAnimalHealthStatusUseCase,
@@ -47,6 +48,10 @@ const listGroupsByFarmSchema = z.object({
 
 const listAnimalsByGroupSchema = z.object({
   groupId: z.string().min(1)
+});
+
+const listAnimalsByFarmSchema = z.object({
+  farmId: z.string().min(1)
 });
 
 const updateAnimalHealthSchema = z.object({
@@ -246,6 +251,54 @@ export const listLivestockAnimals = createServerFn({
     };
   }
 });
+
+export const listAnimalsByFarm = createServerFn({
+  method: 'GET'
+})
+  .validator((farmId: string) => farmId)
+  .handler(async ({data}) => {
+    try {
+      const validatedData = listAnimalsByFarmSchema.parse(data);
+      const listAnimalsByFarmUseCase = container.get<ListAnimalsByFarmUseCase>(
+        'listAnimalsByFarmUseCase'
+      );
+
+      const result = await listAnimalsByFarmUseCase.execute({
+        farmId: validatedData.farmId
+      });
+
+      return {
+        success: true,
+        data: {
+          animals: result.animals.map((animal: LivestockAnimal) => ({
+            id: animal.id,
+            groupId: animal.groupId,
+            tagNumber: animal.tagNumber,
+            name: animal.name,
+            sex: animal.sex,
+            birthDate: animal.birthDate,
+            breed: animal.breed,
+            motherTagNumber: animal.motherTagNumber,
+            fatherTagNumber: animal.fatherTagNumber,
+            currentWeight: animal.currentWeight,
+            healthStatus: animal.healthStatus,
+            age: animal.getAge(),
+            isHealthy: animal.isHealthy(),
+            createdAt: animal.createdAt,
+            updatedAt: animal.updatedAt
+          }))
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to list animals by farm'
+      };
+    }
+  });
 
 export const updateAnimalHealth = createServerFn({
   method: 'POST'

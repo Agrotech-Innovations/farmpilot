@@ -32,6 +32,7 @@ import {
   UpdateTaskStatusUseCase,
   CreateLivestockGroupUseCase,
   AddLivestockAnimalUseCase,
+  ListAnimalsByFarmUseCase,
   CreateHealthRecordUseCase,
   GetHealthRecordsUseCase,
   UpdateAnimalHealthStatusUseCase,
@@ -121,6 +122,7 @@ export interface Dependencies {
   updateTaskStatusUseCase: UpdateTaskStatusUseCase;
   createLivestockGroupUseCase: CreateLivestockGroupUseCase;
   addLivestockAnimalUseCase: AddLivestockAnimalUseCase;
+  listAnimalsByFarmUseCase: ListAnimalsByFarmUseCase;
   createHealthRecordUseCase: CreateHealthRecordUseCase;
   getHealthRecordsUseCase: GetHealthRecordsUseCase;
   updateAnimalHealthStatusUseCase: UpdateAnimalHealthStatusUseCase;
@@ -233,6 +235,9 @@ class DIContainer {
       livestockRepository
     );
     const addLivestockAnimalUseCase = new AddLivestockAnimalUseCase(
+      livestockRepository
+    );
+    const listAnimalsByFarmUseCase = new ListAnimalsByFarmUseCase(
       livestockRepository
     );
     const createHealthRecordUseCase = new CreateHealthRecordUseCase(
@@ -375,6 +380,7 @@ class DIContainer {
       updateTaskStatusUseCase,
       createLivestockGroupUseCase,
       addLivestockAnimalUseCase,
+      listAnimalsByFarmUseCase,
       createHealthRecordUseCase,
       getHealthRecordsUseCase,
       updateAnimalHealthStatusUseCase,

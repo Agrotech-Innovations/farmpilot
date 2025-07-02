@@ -14,6 +14,7 @@ export interface LivestockRepository {
 
   // Livestock Animals
   findAnimalsByGroup(groupId: string): Promise<LivestockAnimal[]>;
+  findAnimalsByFarm(farmId: string): Promise<LivestockAnimal[]>;
   findAnimalById(id: string): Promise<LivestockAnimal | null>;
   findAnimalByTagNumber(
     groupId: string,

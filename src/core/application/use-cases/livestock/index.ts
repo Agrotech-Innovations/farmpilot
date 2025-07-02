@@ -1,5 +1,6 @@
 export * from './create-livestock-group.use-case';
 export * from './add-livestock-animal.use-case';
+export * from './list-animals-by-farm.use-case';
 export * from './create-health-record.use-case';
 export * from './get-health-records.use-case';
 export * from './update-animal-health-status.use-case';

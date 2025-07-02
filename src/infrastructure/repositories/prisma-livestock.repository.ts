@@ -67,6 +67,19 @@ export class PrismaLivestockRepository implements LivestockRepository {
     return animals.map((animal) => this.animalToDomain(animal));
   }
 
+  async findAnimalsByFarm(farmId: string): Promise<LivestockAnimal[]> {
+    const animals = await this.prisma.livestockAnimal.findMany({
+      where: {
+        group: {
+          farmId
+        }
+      },
+      orderBy: {tagNumber: 'asc'}
+    });
+
+    return animals.map((animal) => this.animalToDomain(animal));
+  }
+
   async findAnimalById(id: string): Promise<LivestockAnimal | null> {
     const animal = await this.prisma.livestockAnimal.findUnique({
       where: {id}
