@@ -24,13 +24,15 @@ src/core/domain/
 - Make entities immutable - return new instances for state changes
 - Example pattern:
 ```typescript
-export class Counter extends BaseEntity {
-  public readonly value: number;
+export class Farm extends BaseEntity {
+  public readonly name: string;
+  public readonly location: string;
   
-  public increment(amount: number = 1): Counter {
-    return new Counter({
+  public updateLocation(newLocation: string): Farm {
+    return new Farm({
       id: this.id,
-      value: this.value + amount,
+      name: this.name,
+      location: newLocation,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     });

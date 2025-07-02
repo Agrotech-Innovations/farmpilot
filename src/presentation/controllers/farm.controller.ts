@@ -26,70 +26,76 @@ const listFarmsSchema = z.object({
 // Server functions
 export const createFarm = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createFarmSchema.parse(data);
-    const createFarmUseCase =
-      container.get<CreateFarmUseCase>('createFarmUseCase');
+})
+  .validator((data: unknown) => {
+    return createFarmSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createFarmUseCase =
+        container.get<CreateFarmUseCase>('createFarmUseCase');
 
-    const result = await createFarmUseCase.execute(validatedData);
+      const result = await createFarmUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        id: result.farm.id,
-        name: result.farm.name,
-        description: result.farm.description,
-        address: result.farm.address,
-        latitude: result.farm.latitude,
-        longitude: result.farm.longitude,
-        totalAcres: result.farm.totalAcres,
-        farmType: result.farm.farmType,
-        organizationId: result.farm.organizationId,
-        createdAt: result.farm.createdAt,
-        updatedAt: result.farm.updatedAt
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create farm'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          id: result.farm.id,
+          name: result.farm.name,
+          description: result.farm.description,
+          address: result.farm.address,
+          latitude: result.farm.latitude,
+          longitude: result.farm.longitude,
+          totalAcres: result.farm.totalAcres,
+          farmType: result.farm.farmType,
+          organizationId: result.farm.organizationId,
+          createdAt: result.farm.createdAt,
+          updatedAt: result.farm.updatedAt
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create farm'
+      };
+    }
+  });
 
 export const listFarms = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listFarmsSchema.parse(data);
-    const listFarmsUseCase =
-      container.get<ListFarmsUseCase>('listFarmsUseCase');
+})
+  .validator((data: unknown) => {
+    return listFarmsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const listFarmsUseCase =
+        container.get<ListFarmsUseCase>('listFarmsUseCase');
 
-    const result = await listFarmsUseCase.execute(validatedData);
+      const result = await listFarmsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        farms: result.farms.map((farm: Farm) => ({
-          id: farm.id,
-          name: farm.name,
-          description: farm.description,
-          address: farm.address,
-          latitude: farm.latitude,
-          longitude: farm.longitude,
-          totalAcres: farm.totalAcres,
-          farmType: farm.farmType,
-          organizationId: farm.organizationId,
-          createdAt: farm.createdAt,
-          updatedAt: farm.updatedAt
-        }))
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to list farms'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          farms: result.farms.map((farm: Farm) => ({
+            id: farm.id,
+            name: farm.name,
+            description: farm.description,
+            address: farm.address,
+            latitude: farm.latitude,
+            longitude: farm.longitude,
+            totalAcres: farm.totalAcres,
+            farmType: farm.farmType,
+            organizationId: farm.organizationId,
+            createdAt: farm.createdAt,
+            updatedAt: farm.updatedAt
+          }))
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to list farms'
+      };
+    }
+  });

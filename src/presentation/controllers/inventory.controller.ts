@@ -149,246 +149,274 @@ const serializeInventoryTransaction = (transaction: InventoryTransaction) => ({
 // Server functions
 export const createInventoryItem = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createInventoryItemSchema.parse(data);
-    const createInventoryItemUseCase =
-      container.get<CreateInventoryItemUseCase>('createInventoryItemUseCase');
+})
+  .validator((data: unknown) => {
+    return createInventoryItemSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createInventoryItemUseCase =
+        container.get<CreateInventoryItemUseCase>('createInventoryItemUseCase');
 
-    const result = await createInventoryItemUseCase.execute(validatedData);
+      const result = await createInventoryItemUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeInventoryItem(result)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create inventory item'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeInventoryItem(result)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create inventory item'
+      };
+    }
+  });
 
 export const getInventoryItem = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getInventoryItemSchema.parse(data);
-    const getInventoryItemUseCase = container.get<GetInventoryItemUseCase>(
-      'getInventoryItemUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return getInventoryItemSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getInventoryItemUseCase = container.get<GetInventoryItemUseCase>(
+        'getInventoryItemUseCase'
+      );
 
-    const result = await getInventoryItemUseCase.execute(validatedData);
+      const result = await getInventoryItemUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeInventoryItem(result)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to get inventory item'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeInventoryItem(result)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get inventory item'
+      };
+    }
+  });
 
 export const listInventoryItems = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listInventoryItemsSchema.parse(data);
-    const listInventoryItemsUseCase = container.get<ListInventoryItemsUseCase>(
-      'listInventoryItemsUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return listInventoryItemsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const listInventoryItemsUseCase =
+        container.get<ListInventoryItemsUseCase>('listInventoryItemsUseCase');
 
-    const result = await listInventoryItemsUseCase.execute(validatedData);
+      const result = await listInventoryItemsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        items: result.items.map(serializeInventoryItem)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to list inventory items'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          items: result.items.map(serializeInventoryItem)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to list inventory items'
+      };
+    }
+  });
 
 export const updateInventoryItem = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = updateInventoryItemSchema.parse(data);
-    const updateInventoryItemUseCase =
-      container.get<UpdateInventoryItemUseCase>('updateInventoryItemUseCase');
+})
+  .validator((data: unknown) => {
+    return updateInventoryItemSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateInventoryItemUseCase =
+        container.get<UpdateInventoryItemUseCase>('updateInventoryItemUseCase');
 
-    const result = await updateInventoryItemUseCase.execute(validatedData);
+      const result = await updateInventoryItemUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeInventoryItem(result)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update inventory item'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeInventoryItem(result)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update inventory item'
+      };
+    }
+  });
 
 export const deleteInventoryItem = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = deleteInventoryItemSchema.parse(data);
-    const deleteInventoryItemUseCase =
-      container.get<DeleteInventoryItemUseCase>('deleteInventoryItemUseCase');
+})
+  .validator((data: unknown) => {
+    return deleteInventoryItemSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const deleteInventoryItemUseCase =
+        container.get<DeleteInventoryItemUseCase>('deleteInventoryItemUseCase');
 
-    await deleteInventoryItemUseCase.execute(validatedData);
+      await deleteInventoryItemUseCase.execute(data);
 
-    return {
-      success: true,
-      message: 'Inventory item deleted successfully'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete inventory item'
-    };
-  }
-});
+      return {
+        success: true,
+        message: 'Inventory item deleted successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete inventory item'
+      };
+    }
+  });
 
 export const recordInventoryTransaction = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = recordTransactionSchema.parse(data);
-    const recordInventoryTransactionUseCase =
-      container.get<RecordInventoryTransactionUseCase>(
-        'recordInventoryTransactionUseCase'
-      );
+})
+  .validator((data: unknown) => {
+    return recordTransactionSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const recordInventoryTransactionUseCase =
+        container.get<RecordInventoryTransactionUseCase>(
+          'recordInventoryTransactionUseCase'
+        );
 
-    const result =
-      await recordInventoryTransactionUseCase.execute(validatedData);
+      const result = await recordInventoryTransactionUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeInventoryTransaction(result)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to record inventory transaction'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeInventoryTransaction(result)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to record inventory transaction'
+      };
+    }
+  });
 
 export const getInventoryTransactions = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getInventoryTransactionsSchema.parse(data);
-    const getInventoryTransactionsUseCase =
-      container.get<GetInventoryTransactionsUseCase>(
-        'getInventoryTransactionsUseCase'
-      );
+})
+  .validator((data: unknown) => {
+    return getInventoryTransactionsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getInventoryTransactionsUseCase =
+        container.get<GetInventoryTransactionsUseCase>(
+          'getInventoryTransactionsUseCase'
+        );
 
-    const result = await getInventoryTransactionsUseCase.execute(validatedData);
+      const result = await getInventoryTransactionsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        transactions: result.transactions.map(serializeInventoryTransaction)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get inventory transactions'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          transactions: result.transactions.map(serializeInventoryTransaction)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get inventory transactions'
+      };
+    }
+  });
 
 export const getInventoryAlerts = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getInventoryAlertsSchema.parse(data);
-    const getInventoryAlertsUseCase = container.get<GetInventoryAlertsUseCase>(
-      'getInventoryAlertsUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return getInventoryAlertsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getInventoryAlertsUseCase =
+        container.get<GetInventoryAlertsUseCase>('getInventoryAlertsUseCase');
 
-    const result = await getInventoryAlertsUseCase.execute(validatedData);
+      const result = await getInventoryAlertsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        lowStockItems: result.lowStockItems.map(serializeInventoryItem),
-        expiredItems: result.expiredItems.map(serializeInventoryItem),
-        expiringSoonItems: result.expiringSoonItems.map(serializeInventoryItem)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get inventory alerts'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          lowStockItems: result.lowStockItems.map(serializeInventoryItem),
+          expiredItems: result.expiredItems.map(serializeInventoryItem),
+          expiringSoonItems: result.expiringSoonItems.map(
+            serializeInventoryItem
+          )
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get inventory alerts'
+      };
+    }
+  });
 
 export const getInventoryAnalytics = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getInventoryAnalyticsSchema.parse(data);
-    const getInventoryAnalyticsUseCase =
-      container.get<GetInventoryAnalyticsUseCase>(
-        'getInventoryAnalyticsUseCase'
-      );
+})
+  .validator((data: unknown) => {
+    return getInventoryAnalyticsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getInventoryAnalyticsUseCase =
+        container.get<GetInventoryAnalyticsUseCase>(
+          'getInventoryAnalyticsUseCase'
+        );
 
-    const result = await getInventoryAnalyticsUseCase.execute(validatedData);
+      const result = await getInventoryAnalyticsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        totalInventoryValue: result.totalInventoryValue,
-        itemUsageHistory: result.itemUsageHistory?.map(
-          serializeInventoryTransaction
-        )
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get inventory analytics'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          totalInventoryValue: result.totalInventoryValue,
+          itemUsageHistory: result.itemUsageHistory?.map(
+            serializeInventoryTransaction
+          )
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get inventory analytics'
+      };
+    }
+  });

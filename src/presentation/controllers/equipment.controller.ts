@@ -102,200 +102,226 @@ const serializeMaintenanceRecord = (record: MaintenanceRecord) => ({
 // Equipment CRUD endpoints
 export const createEquipment = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createEquipmentSchema.parse(data);
-    const createEquipmentUseCase = container.getCreateEquipmentUseCase();
+})
+  .validator((data: unknown) => {
+    return createEquipmentSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createEquipmentUseCase = container.getCreateEquipmentUseCase();
 
-    const equipment = await createEquipmentUseCase.execute(validatedData);
+      const equipment = await createEquipmentUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeEquipment(equipment)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to create equipment'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeEquipment(equipment)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to create equipment'
+      };
+    }
+  });
 
 export const listEquipment = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listEquipmentSchema.parse(data);
-    const listEquipmentUseCase = container.getListEquipmentUseCase();
+})
+  .validator((data: unknown) => {
+    return listEquipmentSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const listEquipmentUseCase = container.getListEquipmentUseCase();
 
-    const result = await listEquipmentUseCase.execute(validatedData);
+      const result = await listEquipmentUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        equipment: result.equipment.map(serializeEquipment)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to list equipment'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          equipment: result.equipment.map(serializeEquipment)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to list equipment'
+      };
+    }
+  });
 
 export const getEquipment = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getEquipmentSchema.parse(data);
-    const getEquipmentUseCase = container.getGetEquipmentUseCase();
+})
+  .validator((data: unknown) => {
+    return getEquipmentSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getEquipmentUseCase = container.getGetEquipmentUseCase();
 
-    const equipment = await getEquipmentUseCase.execute(validatedData);
+      const equipment = await getEquipmentUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeEquipment(equipment)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to get equipment'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeEquipment(equipment)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to get equipment'
+      };
+    }
+  });
 
 export const updateEquipment = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = updateEquipmentSchema.parse(data);
-    const updateEquipmentUseCase = container.getUpdateEquipmentUseCase();
+})
+  .validator((data: unknown) => {
+    return updateEquipmentSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateEquipmentUseCase = container.getUpdateEquipmentUseCase();
 
-    const equipment = await updateEquipmentUseCase.execute(validatedData);
+      const equipment = await updateEquipmentUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeEquipment(equipment)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to update equipment'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeEquipment(equipment)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to update equipment'
+      };
+    }
+  });
 
 export const deleteEquipment = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = deleteEquipmentSchema.parse(data);
-    const deleteEquipmentUseCase = container.getDeleteEquipmentUseCase();
+})
+  .validator((data: unknown) => {
+    return deleteEquipmentSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const deleteEquipmentUseCase = container.getDeleteEquipmentUseCase();
 
-    await deleteEquipmentUseCase.execute(validatedData);
+      await deleteEquipmentUseCase.execute(data);
 
-    return {
-      success: true,
-      message: 'Equipment deleted successfully'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to delete equipment'
-    };
-  }
-});
+      return {
+        success: true,
+        message: 'Equipment deleted successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to delete equipment'
+      };
+    }
+  });
 
 // Maintenance endpoints
 export const scheduleMaintenance = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = scheduleMaintenanceSchema.parse(data);
-    const scheduleMaintenanceUseCase =
-      container.getScheduleMaintenanceUseCase();
+})
+  .validator((data: unknown) => {
+    return scheduleMaintenanceSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const scheduleMaintenanceUseCase =
+        container.getScheduleMaintenanceUseCase();
 
-    const record = await scheduleMaintenanceUseCase.execute(validatedData);
+      const record = await scheduleMaintenanceUseCase.execute(data);
 
-    return {
-      success: true,
-      data: serializeMaintenanceRecord(record)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to schedule maintenance'
-    };
-  }
-});
+      return {
+        success: true,
+        data: serializeMaintenanceRecord(record)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to schedule maintenance'
+      };
+    }
+  });
 
 export const getMaintenanceRecords = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getMaintenanceRecordsSchema.parse(data);
-    const getMaintenanceRecordsUseCase =
-      container.getGetMaintenanceRecordsUseCase();
+})
+  .validator((data: unknown) => {
+    return getMaintenanceRecordsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getMaintenanceRecordsUseCase =
+        container.getGetMaintenanceRecordsUseCase();
 
-    const result = await getMaintenanceRecordsUseCase.execute(validatedData);
+      const result = await getMaintenanceRecordsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        records: result.records.map(serializeMaintenanceRecord)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get maintenance records'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          records: result.records.map(serializeMaintenanceRecord)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get maintenance records'
+      };
+    }
+  });
 
 // Analytics endpoints
 export const getEquipmentAnalytics = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getEquipmentAnalyticsSchema.parse(data);
-    const getEquipmentAnalyticsUseCase =
-      container.getGetEquipmentAnalyticsUseCase();
+})
+  .validator((data: unknown) => {
+    return getEquipmentAnalyticsSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getEquipmentAnalyticsUseCase =
+        container.getGetEquipmentAnalyticsUseCase();
 
-    const analytics = await getEquipmentAnalyticsUseCase.execute(validatedData);
+      const analytics = await getEquipmentAnalyticsUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        totalEquipment: analytics.totalEquipment,
-        totalValue: analytics.totalValue,
-        equipmentByStatus: analytics.equipmentByStatus,
-        equipmentNeedingMaintenance:
-          analytics.equipmentNeedingMaintenance.map(serializeEquipment),
-        upcomingMaintenance: analytics.upcomingMaintenance.map(
-          serializeMaintenanceRecord
-        ),
-        maintenanceCosts: analytics.maintenanceCosts,
-        averageEquipmentAge: analytics.averageEquipmentAge
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get equipment analytics'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          totalEquipment: analytics.totalEquipment,
+          totalValue: analytics.totalValue,
+          equipmentByStatus: analytics.equipmentByStatus,
+          equipmentNeedingMaintenance:
+            analytics.equipmentNeedingMaintenance.map(serializeEquipment),
+          upcomingMaintenance: analytics.upcomingMaintenance.map(
+            serializeMaintenanceRecord
+          ),
+          maintenanceCosts: analytics.maintenanceCosts,
+          averageEquipmentAge: analytics.averageEquipmentAge
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get equipment analytics'
+      };
+    }
+  });

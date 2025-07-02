@@ -78,230 +78,254 @@ const serializeTask = (task: Task) => ({
 // Server functions
 export const createTask = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = createTaskSchema.parse(data);
-    const createTaskUseCase =
-      container.get<CreateTaskUseCase>('createTaskUseCase');
+})
+  .validator((data: unknown) => {
+    return createTaskSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const createTaskUseCase =
+        container.get<CreateTaskUseCase>('createTaskUseCase');
 
-    const result = await createTaskUseCase.execute(validatedData);
+      const result = await createTaskUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        task: serializeTask(result.task)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create task'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          task: serializeTask(result.task)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create task'
+      };
+    }
+  });
 
 export const getTask = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = getTaskSchema.parse(data);
-    const getTaskUseCase = container.get<GetTaskUseCase>('getTaskUseCase');
+})
+  .validator((data: unknown) => {
+    return getTaskSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const getTaskUseCase = container.get<GetTaskUseCase>('getTaskUseCase');
 
-    const result = await getTaskUseCase.execute(validatedData);
+      const result = await getTaskUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        task: serializeTask(result.task)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to get task'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          task: serializeTask(result.task)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get task'
+      };
+    }
+  });
 
 export const listTasks = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = listTasksSchema.parse(data);
-    const listTasksUseCase =
-      container.get<ListTasksUseCase>('listTasksUseCase');
+})
+  .validator((data: unknown) => {
+    return listTasksSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const listTasksUseCase =
+        container.get<ListTasksUseCase>('listTasksUseCase');
 
-    const result = await listTasksUseCase.execute(validatedData);
+      const result = await listTasksUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        tasks: result.tasks.map(serializeTask),
-        stats: result.stats
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to list tasks'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          tasks: result.tasks.map(serializeTask),
+          stats: result.stats
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to list tasks'
+      };
+    }
+  });
 
 export const updateTaskStatus = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = updateTaskStatusSchema.parse(data);
-    const updateTaskStatusUseCase = container.get<UpdateTaskStatusUseCase>(
-      'updateTaskStatusUseCase'
-    );
+})
+  .validator((data: unknown) => {
+    return updateTaskStatusSchema.parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const updateTaskStatusUseCase = container.get<UpdateTaskStatusUseCase>(
+        'updateTaskStatusUseCase'
+      );
 
-    const result = await updateTaskStatusUseCase.execute(validatedData);
+      const result = await updateTaskStatusUseCase.execute(data);
 
-    return {
-      success: true,
-      data: {
-        task: serializeTask(result.task)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to update task status'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          task: serializeTask(result.task)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update task status'
+      };
+    }
+  });
 
 // Additional task management endpoints
 export const deleteTask = createServerFn({
   method: 'POST'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         taskId: z.string().min(1)
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      // For now, we'll use the task repository directly since there's no delete use case
+      const taskRepository = container.get<TaskRepository>('taskRepository');
+      await taskRepository.delete(data.taskId);
 
-    // For now, we'll use the task repository directly since there's no delete use case
-    const taskRepository = container.get<TaskRepository>('taskRepository');
-    await taskRepository.delete(validatedData.taskId);
-
-    return {
-      success: true,
-      message: 'Task deleted successfully'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete task'
-    };
-  }
-});
+      return {
+        success: true,
+        message: 'Task deleted successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete task'
+      };
+    }
+  });
 
 export const searchTasks = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         farmId: z.string().min(1),
         query: z.string().min(1),
         limit: z.number().min(1).max(100).optional()
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const taskRepository = container.get<TaskRepository>('taskRepository');
+      const tasks = await taskRepository.searchTasks(
+        data.farmId,
+        data.query,
+        data.limit
+      );
 
-    const taskRepository = container.get<TaskRepository>('taskRepository');
-    const tasks = await taskRepository.searchTasks(
-      validatedData.farmId,
-      validatedData.query,
-      validatedData.limit
-    );
-
-    return {
-      success: true,
-      data: {
-        tasks: tasks.map(serializeTask)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to search tasks'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          tasks: tasks.map(serializeTask)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to search tasks'
+      };
+    }
+  });
 
 export const getTaskStats = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         farmId: z.string().min(1)
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const taskRepository = container.get<TaskRepository>('taskRepository');
 
-    const taskRepository = container.get<TaskRepository>('taskRepository');
+      const [statusStats, priorityStats, categoryStats, assigneeStats] =
+        await Promise.all([
+          taskRepository.getTaskStatsByStatus(data.farmId),
+          taskRepository.getTaskStatsByPriority(data.farmId),
+          taskRepository.getTaskStatsByCategory(data.farmId),
+          taskRepository.getTaskStatsByAssignee(data.farmId)
+        ]);
 
-    const [statusStats, priorityStats, categoryStats, assigneeStats] =
-      await Promise.all([
-        taskRepository.getTaskStatsByStatus(validatedData.farmId),
-        taskRepository.getTaskStatsByPriority(validatedData.farmId),
-        taskRepository.getTaskStatsByCategory(validatedData.farmId),
-        taskRepository.getTaskStatsByAssignee(validatedData.farmId)
-      ]);
-
-    return {
-      success: true,
-      data: {
-        statusStats,
-        priorityStats,
-        categoryStats,
-        assigneeStats
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to get task statistics'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          statusStats,
+          priorityStats,
+          categoryStats,
+          assigneeStats
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get task statistics'
+      };
+    }
+  });
 
 export const getTaskCalendar = createServerFn({
   method: 'GET'
-}).handler(async (data: unknown) => {
-  try {
-    const validatedData = z
+})
+  .validator((data: unknown) => {
+    return z
       .object({
         farmId: z.string().min(1),
         month: z.number().min(1).max(12),
         year: z.number().min(2000).max(3000)
       })
       .parse(data);
+  })
+  .handler(async ({data}) => {
+    try {
+      const taskRepository = container.get<TaskRepository>('taskRepository');
+      const tasks = await taskRepository.getTaskCalendar(
+        data.farmId,
+        data.month,
+        data.year
+      );
 
-    const taskRepository = container.get<TaskRepository>('taskRepository');
-    const tasks = await taskRepository.getTaskCalendar(
-      validatedData.farmId,
-      validatedData.month,
-      validatedData.year
-    );
-
-    return {
-      success: true,
-      data: {
-        tasks: tasks.map(serializeTask)
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to get task calendar'
-    };
-  }
-});
+      return {
+        success: true,
+        data: {
+          tasks: tasks.map(serializeTask)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to get task calendar'
+      };
+    }
+  });

@@ -18,7 +18,7 @@ src/core/application/
 ```
 
 ## Use Case Guidelines
-- Organize by feature/domain (e.g., `counter/`, `product/`)
+- Organize by feature/domain (e.g., `farm/`, `livestock/`)
 - End class names with `UseCase`
 - Have single responsibility (one business operation)
 - Example pattern:
